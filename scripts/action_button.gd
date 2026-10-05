@@ -5,7 +5,7 @@ extends Control
 
 signal pressed
 
-const RADIUS := 80.0
+const RADIUS := 66.0
 
 # Что написано на кнопке («Взять»). Пусто = сейчас делать нечего.
 var label_text := "":
@@ -18,14 +18,14 @@ var _touch_index := -1
 
 
 func _ready() -> void:
-	# Прижимаем к правому нижнему углу, размер 160x160
+	# Прижимаем к правому нижнему углу, размер 140x140
 	anchor_left = 1.0
 	anchor_right = 1.0
 	anchor_top = 1.0
 	anchor_bottom = 1.0
-	offset_left = -190.0
+	offset_left = -170.0
 	offset_right = -30.0
-	offset_top = -190.0
+	offset_top = -170.0
 	offset_bottom = -30.0
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -52,4 +52,4 @@ func _draw() -> void:
 	draw_arc(c, RADIUS, 0.0, TAU, 48, Color(1, 1, 1, 0.6), 3.0)
 	var text := label_text if active else "Действие"
 	draw_string(ThemeDB.fallback_font, Vector2(0, c.y + 8), text,
-			HORIZONTAL_ALIGNMENT_CENTER, size.x, 24, Color.WHITE)
+			HORIZONTAL_ALIGNMENT_CENTER, size.x, 21, Color.WHITE)

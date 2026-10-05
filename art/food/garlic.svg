@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Головка чеснока -->
+  <path d="M32 6 C34 14 52 20 52 38 C52 50 43 56 32 56 C21 56 12 50 12 38 C12 20 30 14 32 6 Z" fill="#f7f0de" stroke="#b9a87c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M32 10 C30 24 26 40 30 55" fill="none" stroke="#d8c9a0" stroke-width="2"/>
+  <path d="M32 10 C34 24 38 40 34 55" fill="none" stroke="#d8c9a0" stroke-width="2"/>
+  <path d="M20 26 C16 36 18 46 24 53" fill="none" stroke="#d8c9a0" stroke-width="2"/>
+  <path d="M44 26 C48 36 46 46 40 53" fill="none" stroke="#d8c9a0" stroke-width="2"/>
+  <path d="M27 57 L32 61 L37 57" fill="none" stroke="#a88a58" stroke-width="2" stroke-linecap="round"/>
+</svg>

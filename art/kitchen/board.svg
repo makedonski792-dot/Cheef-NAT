@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="70" viewBox="0 0 120 70">
+  <!-- Рабочая поверхность с разделочной доской и ножом -->
+  <rect width="120" height="70" fill="#c99a5b"/>
+  <rect width="120" height="5" fill="#e2b87e"/>
+  <rect y="64" width="120" height="6" fill="#94672f"/>
+  <path d="M0 0H120M0 70H120" stroke="#6b4423" stroke-width="2"/>
+  <rect x="12" y="10" width="72" height="50" rx="8" fill="#f0d4a2" stroke="#a9783a" stroke-width="2.5"/>
+  <path d="M20 24H76M20 36H76M20 48H76" stroke="#dcb97f" stroke-width="2"/>
+  <circle cx="76" cy="18" r="3.5" fill="#c99a5b" stroke="#a9783a" stroke-width="1.5"/>
+  <g transform="rotate(-30 98 38)">
+    <polygon points="82,30 112,30 116,40 82,40" fill="#d1d9e3" stroke="#7b8794" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="70" y="31" width="14" height="8" rx="3" fill="#5b3a1e" stroke="#33200f" stroke-width="1.5"/>
+  </g>
+</svg>

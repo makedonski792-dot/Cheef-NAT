@@ -52,7 +52,7 @@ func _init() -> void:
 	check(chef.held != null and chef.held.id == held_id, "предмет снова взят со стола")
 
 	print("Мусорка")
-	chef.position = Vector2(830, 460)
+	chef.position = Vector2(820, 330)
 	await physics_frame
 	check(kitchen.find_station() is TrashBin, "возле мусорки доступно действие")
 	kitchen.do_action()

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="70" viewBox="0 0 160 70">
+  <!-- Стол сборки блюда: светлая столешница с большой тарелкой -->
+  <rect width="160" height="70" fill="#d9c6a0"/>
+  <rect width="160" height="6" fill="#efe0bd"/>
+  <rect y="62" width="160" height="8" fill="#a48c5c"/>
+  <path d="M0 0H160M0 70H160" stroke="#6b4423" stroke-width="2"/>
+  <ellipse cx="80" cy="37" rx="52" ry="26" fill="#ffffff" stroke="#b9c0ca" stroke-width="2.5"/>
+  <ellipse cx="80" cy="37" rx="38" ry="18" fill="#f3f5f8" stroke="#d6dbe3" stroke-width="2"/>
+  <ellipse cx="80" cy="37" rx="52" ry="26" fill="none" stroke="#e0b64a" stroke-width="1.5" stroke-dasharray="3 5"/>
+</svg>

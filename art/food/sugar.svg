@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Кубики сахара -->
+  <g stroke="#9aa5b4" stroke-width="2" stroke-linejoin="round">
+    <polygon points="6,36 20,30 34,36 20,42" fill="#ffffff"/>
+    <polygon points="6,36 20,42 20,56 6,50" fill="#e6ebf2"/>
+    <polygon points="20,42 34,36 34,50 20,56" fill="#d3dae5"/>
+    <polygon points="30,26 44,20 58,26 44,32" fill="#ffffff"/>
+    <polygon points="30,26 44,32 44,46 30,40" fill="#e6ebf2"/>
+    <polygon points="44,32 58,26 58,40 44,46" fill="#d3dae5"/>
+    <polygon points="18,12 32,6 46,12 32,18" fill="#ffffff"/>
+    <polygon points="18,12 32,18 32,30 18,24" fill="#e6ebf2"/>
+    <polygon points="32,18 46,12 46,24 32,30" fill="#d3dae5"/>
+  </g>
+</svg>

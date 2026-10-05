@@ -10,6 +10,7 @@ func setup(r: Rect2, color: Color, label: String, solid := true) -> void:
 	super.setup(r, color, label, solid)
 	_view = ItemView.new()
 	_view.position = r.size / 2.0 + Vector2(0, 8)
+	_view.label_offset = -74.0
 	add_child(_view)
 
 

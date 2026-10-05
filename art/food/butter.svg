@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Кусок сливочного масла -->
+  <polygon points="8,26 32,14 58,26 34,38" fill="#fff3a8" stroke="#b8932a" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="8,26 34,38 34,52 8,40" fill="#f7dc62" stroke="#b8932a" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="34,38 58,26 58,40 34,52" fill="#e3bd42" stroke="#b8932a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M16 24 L30 18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+</svg>

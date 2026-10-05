@@ -122,7 +122,7 @@ func _init() -> void:
 	kitchen.do_action()
 	check(chef.held != null and chef.held.is_dish, "блюдо в руках: " + chef.held.name)
 
-	await go(Vector2(830, 460))
+	await go(Vector2(820, 330))
 	check(kitchen.find_station() == null, "готовое блюдо в мусорку выбросить нельзя")
 	await go(Vector2(840, 200))
 	check(kitchen.find_station() is ServeWindow, "возле раздачи можно подать")

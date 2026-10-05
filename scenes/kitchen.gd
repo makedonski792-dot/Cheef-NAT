@@ -225,30 +225,22 @@ func _on_menu_pressed() -> void:
 
 # Пол, стены и столы. Всё, что рисуем как блок, ещё и не пускает повара.
 func _build_floor_and_walls() -> void:
-	# Огромный тёмный фон (виден, если экран шире кухни) и сам пол
-	_add_floor(Rect2(-2000, -2000, 5000, 5000), Color("2b2018"))
-	_add_floor(Rect2(Vector2.ZERO, KITCHEN_SIZE), Color("e9dcc0"))
+	# Пол (плитка) и тёмный фон за его пределами
+	add_child(KitchenFloor.new())
 
 	var wall_color := Color("5b3a1e")
 	var counter_color := Color("b08a5a")
-	_add_block(Rect2(0, 0, 960, 70), counter_color)   # длинный стол у верхней стены
-	_add_block(Rect2(0, 520, 960, 20), wall_color)    # нижняя стена
-	_add_block(Rect2(0, 0, 20, 540), wall_color)      # левая стена
-	_add_block(Rect2(940, 0, 20, 540), wall_color)    # правая стена
+	_add_block(Rect2(0, 0, 960, 70), counter_color, "counter")   # длинный стол у верхней стены
+	_add_block(Rect2(0, 520, 960, 20), wall_color, "wall_tile")  # нижняя стена
+	_add_block(Rect2(0, 0, 20, 540), wall_color, "wall_tile")    # левая стена
+	_add_block(Rect2(940, 0, 20, 540), wall_color, "wall_tile")  # правая стена
 
 
-func _add_floor(rect: Rect2, color: Color) -> void:
-	var floor_rect := ColorRect.new()
-	floor_rect.position = rect.position
-	floor_rect.size = rect.size
-	floor_rect.color = color
-	add_child(floor_rect)
-
-
-# Простой твёрдый блок (стена)
-func _add_block(rect: Rect2, color: Color) -> void:
+# Твёрдый блок (стена или стол) с картинкой, которая повторяется плиткой
+func _add_block(rect: Rect2, color: Color, art_name: String) -> void:
 	var block := Station.new()
 	block.setup(rect, color, "")
+	block.set_art(Icons.kitchen(art_name), true)
 	add_child(block)
 
 
@@ -262,40 +254,49 @@ func _build_stations() -> void:
 	var start := 40.0 + (880.0 - ids.size() * cell) / 2.0
 	for i in ids.size():
 		var crate := Crate.new()
-		crate.setup_crate(ids[i], ingredients.get(ids[i], {}), Rect2(start + i * cell + 7, 8, 96, 56))
+		crate.setup_crate(ids[i], ingredients.get(ids[i], {}), Rect2(start + i * cell + 7, 4, 96, 62))
 		_add_station(crate)
 
 	# Столы
 	var island := Table.new()
 	island.setup(Rect2(400, 240, 160, 70), Color("b08a5a"), "Стол")
+	island.set_art(Icons.kitchen("counter"))
 	_add_station(island)
 
 	var side_table := Table.new()
-	side_table.setup(Rect2(60, 400, 150, 70), Color("b08a5a"), "Стол")
+	side_table.setup(Rect2(240, 400, 140, 70), Color("b08a5a"), "Стол")
+	side_table.set_art(Icons.kitchen("counter"))
 	_add_station(side_table)
 
 	# Рабочие станции: доска слева от острова, плита справа
 	var board := CuttingBoard.new()
 	board.setup(Rect2(220, 240, 120, 70), Color("d8b98a"), "Доска")
+	board.set_art(Icons.kitchen("board"))
 	_add_station(board)
 
 	var stove := Stove.new()
 	stove.setup(Rect2(620, 240, 120, 70), Color("4b5563"), "Плита")
+	stove.set_art(Icons.kitchen("stove"))
 	_add_station(stove)
 
 	# Сборка блюда (снизу по центру) и раздача (на правой стене)
 	assembly = AssemblyStation.new()
 	assembly.setup(Rect2(400, 430, 160, 70), Color("f3e9d2"), "Сборка")
+	assembly.set_art(Icons.kitchen("assembly"))
 	assembly.logic = logic
 	_add_station(assembly)
 
 	serve_window = ServeWindow.new()
 	serve_window.setup(Rect2(870, 120, 70, 160), Color("fbbf24"), "Раздача")
+	serve_window.set_art(Icons.kitchen("serve"))
+	serve_window.label_y = 24.0
 	serve_window.served.connect(_on_served)
 	_add_station(serve_window)
 
 	var bin := TrashBin.new()
-	bin.setup(Rect2(850, 420, 90, 90), Color("6b7280"), "Мусорка")
+	bin.setup(Rect2(850, 288, 90, 80), Color("6b7280"), "Мусорка")
+	bin.set_art(Icons.kitchen("bin"))
+	bin.label_y = 48.0
 	_add_station(bin)
 
 

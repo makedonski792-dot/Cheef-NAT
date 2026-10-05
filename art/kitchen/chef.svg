@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Повар, вид сверху, смотрит вправо: белый китель, красный платок, руки вперёд, пышный колпак -->
+  <ellipse cx="30" cy="32" rx="14" ry="24" fill="#f8fafc" stroke="#8a97a8" stroke-width="2.5"/>
+  <circle cx="46" cy="16" r="6" fill="#f3c9a0" stroke="#b9805a" stroke-width="2"/>
+  <circle cx="46" cy="48" r="6" fill="#f3c9a0" stroke="#b9805a" stroke-width="2"/>
+  <path d="M44 24 L54 32 L44 40 Z" fill="#dc2626" stroke="#8f1515" stroke-width="2" stroke-linejoin="round"/>
+  <g fill="#ffffff" stroke="#b6c0cc" stroke-width="2">
+    <circle cx="22" cy="32" r="8"/>
+    <circle cx="26" cy="23" r="8"/>
+    <circle cx="26" cy="41" r="8"/>
+    <circle cx="35" cy="26" r="8"/>
+    <circle cx="35" cy="38" r="8"/>
+  </g>
+  <circle cx="30" cy="32" r="9" fill="#ffffff"/>
+  <path d="M24 32 H36 M30 26 V38" stroke="#dbe2ea" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -58,8 +58,17 @@ func _physics_process(_delta: float) -> void:
 		queue_redraw()
 
 
-# Рисуем повара кодом: белый «китель» и тёмная точка, показывающая направление
+# Рисуем повара картинкой, повёрнутой туда, куда он смотрит.
+# Если картинки нет, рисуем запасной кружок с точкой-направлением.
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, RADIUS, Color("f2f2f2"))
-	draw_arc(Vector2.ZERO, RADIUS, 0.0, TAU, 32, Color("5b3a1e"), 3.0)
-	draw_circle(facing * 11.0, 5.0, Color("5b3a1e"))
+	# Тень под поваром
+	draw_circle(Vector2(0, 4), RADIUS + 2.0, Color(0, 0, 0, 0.18))
+	var texture := Icons.kitchen("chef")
+	if texture != null:
+		draw_set_transform(Vector2.ZERO, facing.angle(), Vector2.ONE)
+		draw_texture_rect(texture, Rect2(-30, -30, 60, 60), false)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	else:
+		draw_circle(Vector2.ZERO, RADIUS, Color("f2f2f2"))
+		draw_arc(Vector2.ZERO, RADIUS, 0.0, TAU, 32, Color("5b3a1e"), 3.0)
+		draw_circle(facing * 11.0, 5.0, Color("5b3a1e"))

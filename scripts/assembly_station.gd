@@ -113,18 +113,29 @@ func _make_dish() -> FoodItem:
 	var item := FoodItem.new("dish", {
 		"name": "%s (%s)" % [logic.recipe["name"], variant["name"]],
 		"color": "#f2c94c",
+		"icon": logic.recipe.get("dish_icon", ""),
 	})
 	item.is_dish = true
 	return item
 
 
-# Внутри станции рисуем кружки добавленных продуктов, а когда готово — золотую рамку
+# На тарелке рисуем добавленные продукты (мелкие картинки в ряд),
+# а когда блюдо готово — золотую рамку и надпись
 func _draw_extra() -> void:
-	for i in delivered.size():
-		var center := Vector2(14 + i * 18, _visual_size.y - 14)
-		draw_circle(center, 8.0, delivered[i].color)
-		draw_arc(center, 8.0, 0.0, TAU, 16, Color("3b2a1a"), 1.5)
+	var count := delivered.size()
+	var step := minf(26.0, 100.0 / maxf(1.0, count))
+	for i in count:
+		var center := Vector2(_visual_size.x / 2.0 + (i - (count - 1) / 2.0) * step, 40.0)
+		var texture := Icons.for_item(delivered[i])
+		if texture != null:
+			draw_texture_rect(texture, Rect2(center - Vector2(13, 13), Vector2(26, 26)), false)
+		else:
+			draw_circle(center, 8.0, delivered[i].color)
+
 	if logic != null and logic.is_finished() and not dish_taken:
 		draw_rect(Rect2(Vector2.ZERO, _visual_size).grow(2), Color("fbbf24"), false, 4.0)
-		draw_string(ThemeDB.fallback_font, Vector2(0, 16), "ГОТОВО!",
-				HORIZONTAL_ALIGNMENT_CENTER, _visual_size.x, 16, Color("fbbf24"))
+		var font := ThemeDB.fallback_font
+		draw_string_outline(font, Vector2(0, 64), "ГОТОВО!", HORIZONTAL_ALIGNMENT_CENTER,
+				_visual_size.x, 16, 5, Color("2b2018"))
+		draw_string(font, Vector2(0, 64), "ГОТОВО!", HORIZONTAL_ALIGNMENT_CENTER,
+				_visual_size.x, 16, Color("fbbf24"))

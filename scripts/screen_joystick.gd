@@ -4,8 +4,8 @@ extends Control
 # пальцев одновременно: одним ведём повара, другим жмём кнопки).
 # Результат лежит в value: вектор длиной от 0 до 1 (куда и как сильно тянем).
 
-const RADIUS := 80.0       # радиус основания джойстика
-const KNOB_RADIUS := 34.0  # радиус «шарика»
+const RADIUS := 70.0       # радиус основания джойстика
+const KNOB_RADIUS := 30.0  # радиус «шарика»
 const DEAD_ZONE := 0.15    # маленькие отклонения игнорируем
 
 var value := Vector2.ZERO
@@ -15,14 +15,14 @@ var _knob_offset := Vector2.ZERO
 
 
 func _ready() -> void:
-	# Прижимаем к левому нижнему углу, размер 240x240
+	# Прижимаем к левому нижнему углу, размер 210x210
 	anchor_left = 0.0
 	anchor_right = 0.0
 	anchor_top = 1.0
 	anchor_bottom = 1.0
 	offset_left = 20.0
-	offset_right = 260.0
-	offset_top = -260.0
+	offset_right = 230.0
+	offset_top = -230.0
 	offset_bottom = -20.0
 	# Сам джойстик не должен «съедать» нажатия на кнопки
 	mouse_filter = Control.MOUSE_FILTER_IGNORE

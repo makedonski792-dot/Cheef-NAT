@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="70" viewBox="0 0 160 70">
+  <!-- Деревянная столешница (для столов и длинного стола у стены) -->
+  <rect width="160" height="70" fill="#c99a5b"/>
+  <rect width="160" height="6" fill="#e2b87e"/>
+  <rect y="62" width="160" height="8" fill="#94672f"/>
+  <path d="M0 24H160M0 44H160" stroke="#b5864a" stroke-width="2"/>
+  <path d="M50 6V24M110 24V44M30 44V62M130 6V24" stroke="#b5864a" stroke-width="2"/>
+  <path d="M0 0H160M0 70H160" stroke="#6b4423" stroke-width="2"/>
+</svg>

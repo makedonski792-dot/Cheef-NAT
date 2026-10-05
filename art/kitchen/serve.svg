@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="70" height="160" viewBox="0 0 70 160">
+  <!-- Раздача: золотая рамка, в скатерти красные и белые полосы, сверху звонок -->
+  <rect width="70" height="160" fill="#f2b632" stroke="#8a5a00" stroke-width="3"/>
+  <rect x="8" y="8" width="54" height="144" fill="#ffffff" stroke="#8a5a00" stroke-width="2"/>
+  <g fill="#d9453b">
+    <rect x="8" y="8" width="54" height="12"/>
+    <rect x="8" y="32" width="54" height="12"/>
+    <rect x="8" y="56" width="54" height="12"/>
+    <rect x="8" y="80" width="54" height="12"/>
+    <rect x="8" y="104" width="54" height="12"/>
+    <rect x="8" y="128" width="54" height="12"/>
+  </g>
+  <circle cx="35" cy="80" r="17" fill="#ffd45e" stroke="#8a5a00" stroke-width="2.5"/>
+  <path d="M26 86 C26 70 44 70 44 86 Z" fill="#fff1b8" stroke="#8a5a00" stroke-width="2"/>
+  <circle cx="35" cy="68" r="2.5" fill="#8a5a00"/>
+  <rect x="25" y="86" width="20" height="4" rx="2" fill="#8a5a00"/>
+</svg>

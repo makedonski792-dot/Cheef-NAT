@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Плитка пола: шахматка в тёплых тонах (повторяется кодом) -->
+  <rect width="80" height="80" fill="#efe4c8"/>
+  <rect width="40" height="40" fill="#e2d1a8"/>
+  <rect x="40" y="40" width="40" height="40" fill="#e2d1a8"/>
+  <path d="M40 0V80M0 40H80" stroke="#d2bf93" stroke-width="1.5"/>
+</svg>
