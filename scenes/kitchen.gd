@@ -25,6 +25,11 @@ func _ready() -> void:
 	chef.z_index = 10
 	add_child(chef)
 
+	# Станциям с работой нужно знать, где повар (доска режет, только пока он рядом)
+	for station in stations:
+		if station is WorkStation:
+			station.worker = chef
+
 	_build_interface()
 
 
@@ -130,6 +135,15 @@ func _build_stations() -> void:
 	var bin := TrashBin.new()
 	bin.setup(Rect2(850, 420, 90, 90), Color("6b7280"), "Мусорка")
 	_add_station(bin)
+
+	# Рабочие станции: доска слева от острова, плита справа
+	var board := CuttingBoard.new()
+	board.setup(Rect2(220, 240, 120, 70), Color("d8b98a"), "Доска")
+	_add_station(board)
+
+	var stove := Stove.new()
+	stove.setup(Rect2(620, 240, 120, 70), Color("4b5563"), "Плита")
+	_add_station(stove)
 
 
 func _add_station(station: Station) -> void:

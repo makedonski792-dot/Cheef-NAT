@@ -23,8 +23,8 @@ func verb(chef: Chef) -> String:
 
 func target_name(chef: Chef) -> String:
 	if chef.held != null:
-		return chef.held.name
-	return slot.name if slot != null else _label
+		return chef.held.display_name()
+	return slot.display_name() if slot != null else _label
 
 
 func interact(chef: Chef) -> void:

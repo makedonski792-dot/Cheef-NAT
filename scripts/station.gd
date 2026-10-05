@@ -73,3 +73,9 @@ func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		draw_multiline_string(font, Vector2(0, _visual_size.y / 2.0 - 2.0), _label,
 				HORIZONTAL_ALIGNMENT_CENTER, _visual_size.x, 13, 3, _text_color)
+	_draw_extra()
+
+
+# Место для дополнительной отрисовки в наследниках (например, полоска прогресса)
+func _draw_extra() -> void:
+	pass

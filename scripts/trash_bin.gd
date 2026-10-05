@@ -8,7 +8,7 @@ func verb(chef: Chef) -> String:
 
 
 func target_name(chef: Chef) -> String:
-	return chef.held.name if chef.held != null else _label
+	return chef.held.display_name() if chef.held != null else _label
 
 
 func interact(chef: Chef) -> void:
