@@ -1,0 +1,12 @@
+# Служебные файлы Godot, их не нужно хранить в git
+.godot/
+*.translation
+
+# Файлы экспорта и ключи подписи Android (никогда не коммитим!)
+export_presets.cfg
+*.keystore
+*.jks
+build/
+
+# Мусор macOS
+.DS_Store
