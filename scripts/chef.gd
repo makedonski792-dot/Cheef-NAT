@@ -11,6 +11,11 @@ var joystick: ScreenJoystick
 # Куда смотрит повар (понадобится, чтобы брать предметы перед собой)
 var facing := Vector2.DOWN
 
+# Что повар держит в руках (null — руки пусты)
+var held: FoodItem = null
+
+var _held_view: ItemView
+
 
 func _ready() -> void:
 	# Круглая «коллизия» — граница, которой повар упирается в стены
@@ -19,6 +24,25 @@ func _ready() -> void:
 	circle.radius = RADIUS
 	shape.shape = circle
 	add_child(shape)
+
+	# Предмет в руках рисуем над головой повара
+	_held_view = ItemView.new()
+	_held_view.position = Vector2(0, -38)
+	add_child(_held_view)
+
+
+# Взять предмет в руки
+func hold(item: FoodItem) -> void:
+	held = item
+	_held_view.set_item(item)
+
+
+# Отдать предмет из рук (возвращает его, руки становятся пустыми)
+func drop() -> FoodItem:
+	var item := held
+	held = null
+	_held_view.set_item(null)
+	return item
 
 
 func _physics_process(_delta: float) -> void:
