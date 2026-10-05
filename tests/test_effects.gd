@@ -51,9 +51,9 @@ func _init() -> void:
 	check(game_state.sound_enabled == true, "включённый звук тоже запоминается")
 
 	print("Анимации")
-	for recipe in RecipeLoader.load_recipes():
-		if recipe["id"] == "onion_soup":
-			game_state.current_recipe = recipe
+	for shift in RecipeLoader.load_shifts():
+		if shift["id"] == "classic":
+			game_state.current_shift = shift
 	var kitchen: Node2D = load("res://scenes/kitchen.tscn").instantiate()
 	root.add_child(kitchen)
 	await physics_frame

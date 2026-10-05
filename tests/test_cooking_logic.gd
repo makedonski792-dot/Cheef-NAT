@@ -71,14 +71,14 @@ func _init() -> void:
 
 	print("Подсказки сборки")
 	var hint_asm := AssemblyStation.new()
-	hint_asm.logic = CookingLogic.new(recipe_by_id(recipes, "ratatouille"))
+	hint_asm.setup_menu([recipe_by_id(recipes, "ratatouille")])
 	var egg := FoodItem.new("eggplant", RecipeLoader.load_ingredients()["eggplant"])
 	var reason := hint_asm.reject_reason(egg)
 	check(reason == "нужно: Баклажан (готово) или Баклажан (нарезка)", "сырой баклажан: " + reason)
 	egg.state = "chopped"
 	reason = hint_asm.reject_reason(egg)
 	check(reason == "сначала добавь: горячее оливковое масло, обжаренный лук, обжаренный перец", "цепочка: " + reason)
-	run_steps(hint_asm.logic, ["oil", "onion", "pepper"])
+	run_steps(hint_asm.candidates[0], ["oil", "onion", "pepper"])
 	check(hint_asm.reject_reason(egg) == "", "после масла, лука и перца нарезанный баклажан принимается")
 
 	print("Крем-брюле")

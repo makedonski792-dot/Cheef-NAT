@@ -5,6 +5,9 @@ extends RefCounted
 
 const INGREDIENTS_PATH := "res://data/ingredients.json"
 const RECIPES_DIR := "res://data/recipes"
+const SHIFTS_DIR := "res://data/shifts"
+# Сколько ящиков помещается вдоль верхнего стола
+const MAX_CRATES := 11
 
 
 # Возвращает словарь ингредиентов: id -> {name, emoji}
@@ -33,6 +36,67 @@ static func load_recipes() -> Array:
 	# Сортируем по названию, чтобы порядок в меню был одинаковым
 	recipes.sort_custom(func(a, b): return a["name"] < b["name"])
 	return recipes
+
+
+# Возвращает смены по порядку (поле order). Смена — это меню из рецептов и
+# настройки потока заказов.
+static func load_shifts() -> Array:
+	var shifts: Array = []
+	var dir := DirAccess.open(SHIFTS_DIR)
+	if dir == null:
+		push_error("Не удалось открыть папку со сменами: " + SHIFTS_DIR)
+		return shifts
+	var all_recipes := load_recipes()
+	for file_name in dir.get_files():
+		if not file_name.ends_with(".json"):
+			continue
+		var shift = _read_json(SHIFTS_DIR + "/" + file_name)
+		if shift is Dictionary and _is_valid_shift(shift, file_name, all_recipes):
+			shifts.append(shift)
+	shifts.sort_custom(func(a, b): return a.get("order", 0) < b.get("order", 0))
+	return shifts
+
+
+# Рецепты (словари) для данной смены, в порядке меню
+static func recipes_for_shift(shift: Dictionary) -> Array:
+	var result: Array = []
+	var all_recipes := load_recipes()
+	for id in shift.get("recipes", []):
+		for recipe in all_recipes:
+			if recipe["id"] == id:
+				result.append(recipe)
+	return result
+
+
+# Все ингредиенты рецептов без повторов (по порядку): столько нужно ящиков
+static func ingredients_for(recipes: Array) -> Array:
+	var result: Array = []
+	for recipe in recipes:
+		for id in recipe.get("ingredients", []):
+			if not (id in result):
+				result.append(id)
+	return result
+
+
+static func _is_valid_shift(shift: Dictionary, file_name: String, all_recipes: Array) -> bool:
+	for key in ["id", "name", "duration", "recipes"]:
+		if not shift.has(key):
+			push_error("В %s нет поля '%s'" % [file_name, key])
+			return false
+	var chosen: Array = []
+	for id in shift["recipes"]:
+		var found := false
+		for recipe in all_recipes:
+			if recipe["id"] == id:
+				chosen.append(recipe)
+				found = true
+		if not found:
+			push_error("В %s неизвестный рецепт '%s'" % [file_name, id])
+			return false
+	if ingredients_for(chosen).size() > MAX_CRATES:
+		push_error("В %s слишком много ингредиентов (больше %d ящиков)" % [file_name, MAX_CRATES])
+		return false
+	return true
 
 
 # Читает JSON-файл. Если файл сломан, пишет понятную ошибку и возвращает null

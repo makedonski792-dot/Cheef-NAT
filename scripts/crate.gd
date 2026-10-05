@@ -14,10 +14,15 @@ func setup_crate(id: String, ingredient_info: Dictionary, r: Rect2) -> void:
 	setup(r, Color(info.get("color", "#cccccc")), info.get("name", id), false)
 	set_art(Icons.kitchen("crate_box"))
 	_icon = Icons.food(info.get("icon", ""))
-	# Название внизу ящика, а картинка продукта над ним
-	label_y = r.size.y - 5.0
-	# Длинные названия пишем мельче, чтобы влезли в одну строку
-	label_size = 11 if String(info.get("name", id)).length() <= 14 else 9
+	# Название внизу ящика, а картинка продукта над ним.
+	# В узком ящике длинное название переносим на две строки мелким шрифтом.
+	var title_length := String(info.get("name", id)).length()
+	if r.size.x < 90.0 and title_length > 11:
+		label_size = 9
+		label_y = 50.0
+	else:
+		label_size = 11 if title_length <= 14 else 9
+		label_y = r.size.y - 5.0
 	# Достать можно, подойдя к столу у ящика (расширяем зону до стены)
 	reach_rect = Rect2(r.position.x - 7, 0, r.size.x + 14, 70)
 

@@ -11,6 +11,9 @@ var state := "raw"
 var info: Dictionary
 # Готовое блюдо, собранное на станции «Сборка» (его несут на раздачу)
 var is_dish := false
+# У готового блюда: какой это рецепт и как он собран (для оценки при подаче)
+var dish_recipe_id := ""
+var dish_logic: CookingLogic
 
 
 # ingredient_id — id из ingredients.json, ingredient_info — запись этого ингредиента

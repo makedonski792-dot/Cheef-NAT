@@ -17,9 +17,9 @@ func _init() -> void:
 	await process_frame
 
 	var game_state = root.get_node("GameState")
-	for recipe in RecipeLoader.load_recipes():
-		if recipe["id"] == "onion_soup":
-			game_state.current_recipe = recipe
+	for shift in RecipeLoader.load_shifts():
+		if shift["id"] == "classic":
+			game_state.current_shift = shift
 
 	var kitchen: Node2D = load("res://scenes/kitchen.tscn").instantiate()
 	root.add_child(kitchen)

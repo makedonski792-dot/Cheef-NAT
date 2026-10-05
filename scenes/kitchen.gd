@@ -1,12 +1,12 @@
 extends Node2D
 # Кухня, как в Overcooked: вид сверху, повар бегает между станциями.
-# Здесь же идёт заказ: таймер, список «что нужно», сборка и подача блюда.
+# Здесь идёт смена: поток заказов от гостей, сборка блюд на тарелке и подача.
 # Размер кухни 960x540 (горизонтальный экран).
 
 const KITCHEN_SIZE := Vector2(960, 540)
 # Как близко к месту должен подойти повар (от края повара)
 const REACH := Chef.RADIUS + 16.0
-const DEFAULT_TIME_LIMIT := 180.0
+const TICKET_GAP := 8.0
 
 var chef: Chef
 var joystick: ScreenJoystick
@@ -14,30 +14,35 @@ var stations: Array[Station] = []
 var assembly: AssemblyStation
 var serve_window: ServeWindow
 
-# Заказ
-var recipe: Dictionary
-var logic: CookingLogic
-var elapsed := 0.0
-var time_limit := DEFAULT_TIME_LIMIT
+# Смена и заказы
+var shift: Dictionary
+var menu: Array = []          # рецепты смены
+var orders: OrderBoard
+var served := 0               # сколько блюд подано
+var failed := 0               # сколько заказов потеряно
+var earned := 0               # сколько монет заработано за смену
 var ended := false
-var last_result: Dictionary = {}
 
-var _required := {}   # id шагов, которые есть в любом варианте блюда
+var _tickets := {}            # Order -> OrderTicket
 var _focus: Station
 var _hint_label: Label
 var _action_button: ActionButton
-var _timer_label: Label
-var _order_label: Label
+var _shift_label: Label
+var _detail_title: Label
+var _detail_label: Label
+var _ticket_row: Control
 var _sound_button: Button
 
 
 func _ready() -> void:
-	recipe = GameState.current_recipe
-	if recipe.is_empty():
-		recipe = RecipeLoader.load_recipes()[0]
-	logic = CookingLogic.new(recipe)
-	time_limit = float(recipe.get("time_limit", DEFAULT_TIME_LIMIT))
-	_find_required_steps()
+	shift = GameState.current_shift
+	if shift.is_empty():
+		shift = GameState.pick_shift()
+	menu = RecipeLoader.recipes_for_shift(shift)
+	orders = OrderBoard.new(shift, menu)
+	orders.order_added.connect(_on_order_added)
+	orders.order_expired.connect(_on_order_expired)
+	orders.order_removed.connect(_on_order_removed)
 
 	_build_floor_and_walls()
 	_build_stations()
@@ -54,7 +59,7 @@ func _ready() -> void:
 			station.worker = chef
 
 	_build_interface()
-	_refresh_order()
+	_refresh_detail()
 
 
 # Уходя с кухни, выключаем все зацикленные звуки
@@ -66,13 +71,12 @@ func _process(delta: float) -> void:
 	if ended:
 		return
 
-	elapsed += delta
-	var left := maxf(0.0, time_limit - elapsed)
-	_timer_label.text = "Время: %d:%02d" % [int(left) / 60, int(left) % 60]
-	_timer_label.add_theme_color_override("font_color", Color("c0392b") if left < 30.0 else Color("3b2a1a"))
-	if left <= 0.0:
-		_end(false)
+	# Время смены идёт: заказы теряют терпение, приходят новые гости
+	orders.update(delta)
+	if orders.is_finished():
+		_end()
 		return
+	_update_hud()
 
 	# Звуки и анимация работы: шкворчание, пока что-то готовится; повар «рубит» у доски
 	var cooking := false
@@ -109,13 +113,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		do_action()
 
 
-# Если повар стоит у «Сборки» с предметом, который сейчас нельзя добавить,
-# объясняем почему (иначе игроку кажется, что ничего не работает)
+# Если повар стоит у «Сборки» или «Раздачи» с предметом, который сейчас нельзя
+# добавить или подать, объясняем почему (иначе кажется, что ничего не работает)
 func _rejection_hint() -> String:
-	if chef.held == null or assembly.distance_to(chef.position) > REACH:
+	if chef.held == null:
 		return ""
-	var reason := assembly.reject_reason(chef.held)
-	return "Сборка: %s" % reason if reason != "" else ""
+	if assembly.distance_to(chef.position) <= REACH:
+		var reason := assembly.reject_reason(chef.held)
+		if reason != "":
+			return "Сборка: %s" % reason
+	if serve_window.distance_to(chef.position) <= REACH:
+		var reason := serve_window.reject_reason(chef)
+		if reason != "":
+			return "Раздача: %s" % reason
+	return ""
 
 
 # Выполнить действие с ближайшим подходящим местом
@@ -123,7 +134,7 @@ func do_action() -> void:
 	var target := find_station()
 	if target != null:
 		target.interact(chef)
-		_refresh_order()
+		_refresh_detail()
 	else:
 		# Делать нечего: тихий «нельзя»
 		Sound.play("reject", -8.0)
@@ -143,10 +154,116 @@ func find_station() -> Station:
 	return best
 
 
-# ---------- Заказ ----------
+# ---------- Заказы ----------
+
+func _on_order_added(order: Order) -> void:
+	var ticket := OrderTicket.new(order)
+	_ticket_row.add_child(ticket)
+	_tickets[order] = ticket
+	_layout_tickets()
+	_refresh_detail()
+	Sound.play("done", -4.0, 1.25)
+
+
+func _on_order_removed(order: Order) -> void:
+	var ticket: OrderTicket = _tickets.get(order)
+	if ticket != null:
+		ticket.queue_free()
+	_tickets.erase(order)
+	_layout_tickets()
+	_refresh_detail()
+
+
+# Гость ушёл, не дождавшись
+func _on_order_expired(order: Order) -> void:
+	failed += 1
+	Sound.play("burnt", -2.0)
+	_float_text("Гость ушёл: %s" % order.recipe["name"], Vector2(330, 160), Color("e53935"))
+
+
+# Блюдо подано гостю
+func _on_served(dish: FoodItem) -> void:
+	var order := orders.find_for(dish.dish_recipe_id)
+	if order == null or ended:
+		return
+	# Оценка: звёзды зависят от того, как быстро блюдо подано после прихода заказа
+	var result := dish.dish_logic.grade(order.elapsed)
+	GameState.add_coins(result["reward"])
+	earned += result["reward"]
+	served += 1
+	orders.complete(order)
+	_float_text("+%d монет" % result["reward"], Vector2(740, 150), Color("2e7d32"))
+
+
+# Билеты в ряд: самый старый заказ слева
+func _layout_tickets() -> void:
+	var index := 0
+	for order in orders.orders:
+		var ticket: OrderTicket = _tickets.get(order)
+		if ticket != null:
+			ticket.position = Vector2(index * (OrderTicket.TICKET_SIZE.x + TICKET_GAP), 0)
+			index += 1
+
+
+# Всплывающая надпись («+40 монет», «Гость ушёл»): поднимается и тает
+func _float_text(text: String, position_: Vector2, color: Color) -> void:
+	var label := Label.new()
+	label.text = text
+	label.position = position_
+	label.z_index = 40
+	label.add_theme_font_size_override("font_size", 24)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_outline_color", Color.WHITE)
+	label.add_theme_constant_override("outline_size", 6)
+	add_child(label)
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(label, "position:y", position_.y - 50.0, 1.4)
+	tween.tween_property(label, "modulate:a", 0.0, 1.4)
+	tween.chain().tween_callback(label.queue_free)
+
+
+# ---------- Интерфейс: обновление ----------
+
+# Таймер смены, счёт и состояние билетов
+func _update_hud() -> void:
+	var left := maxf(0.0, orders.duration() - orders.elapsed)
+	_shift_label.text = "Смена: %d:%02d\nПодано: %d  (+%d)" % [int(left) / 60, int(left) % 60, served, earned]
+	_shift_label.add_theme_color_override("font_color", Color("c0392b") if left < 30.0 else Color("3b2a1a"))
+	for order in _tickets:
+		var ticket: OrderTicket = _tickets[order]
+		ticket.highlighted = assembly.is_building(order.recipe["id"])
+		ticket.queue_redraw()
+
+
+# Подсказка слева: что собирается на тарелке сейчас или рецепт самого старого заказа
+func _refresh_detail() -> void:
+	var cooking := assembly.best_candidate()
+	var recipe: Dictionary
+	var header := "Нужно (* — на выбор):"
+	if cooking != null:
+		recipe = cooking.recipe
+		header = "Готово! Неси на раздачу" if cooking.is_finished() else "Собираем (* — на выбор):"
+	elif not orders.orders.is_empty():
+		recipe = orders.orders[0].recipe
+	else:
+		_detail_title.text = "Ждём гостей…"
+		_detail_label.text = ""
+		return
+
+	var required := _required_steps(recipe)
+	var lines: Array[String] = []
+	for step in recipe["steps"]:
+		var mark := "[x]" if cooking != null and step["id"] in cooking.done else "[  ]"
+		var optional := "" if required.has(step["id"]) else " *"
+		lines.append("%s %s%s" % [mark, step["text"], optional])
+	_detail_title.text = recipe["name"]
+	_detail_label.text = header + "\n" + "\n".join(lines)
+	_detail_label.add_theme_font_size_override("font_size", 13 if recipe["steps"].size() <= 8 else 11)
+
 
 # Шаги, которые входят во все варианты блюда (остальные — «на выбор»)
-func _find_required_steps() -> void:
+func _required_steps(recipe: Dictionary) -> Dictionary:
+	var required := {}
 	for step in recipe["steps"]:
 		var in_all := true
 		for variant in recipe["variants"]:
@@ -154,41 +271,25 @@ func _find_required_steps() -> void:
 				in_all = false
 				break
 		if in_all:
-			_required[step["id"]] = true
+			required[step["id"]] = true
+	return required
 
 
-# Обновить список «что нужно» в карточке заказа
-func _refresh_order() -> void:
-	var lines: Array[String] = []
-	for step in recipe["steps"]:
-		var mark := "[x]" if step["id"] in logic.done else "[  ]"
-		var optional := "" if _required.has(step["id"]) else " *"
-		lines.append("%s %s%s" % [mark, step["text"], optional])
-	var title := "Нужно (* — на выбор):\n"
-	if logic.is_finished():
-		title = "Блюдо собрано! Неси на раздачу.\n"
-	_order_label.text = title + "\n".join(lines)
+# ---------- Конец смены ----------
 
-
-# Блюдо подано гостю
-func _on_served(_item: FoodItem) -> void:
-	if ended:
-		return
-	last_result = logic.grade(elapsed)
-	GameState.add_coins(last_result["reward"])
-	_end(true)
-
-
-# Заказ закончен: подан (success) или время вышло
-func _end(success: bool) -> void:
+# Смена закончилась: время вышло или гостей больше не будет и все обслужены
+func _end() -> void:
 	ended = true
+	failed += orders.orders.size()   # кого не успели обслужить
+	var day := GameState.day
+	GameState.finish_shift()
 	get_tree().paused = true
 	Sound.stop_loops()
-	Sound.play("success" if success else "fail")
-	_show_overlay(success)
+	Sound.play("success" if served > 0 and served >= failed else "fail")
+	_show_overlay(day)
 
 
-func _show_overlay(success: bool) -> void:
+func _show_overlay(day: int) -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	# Пока игра на паузе, окно с кнопками должно работать
@@ -204,33 +305,40 @@ func _show_overlay(success: bool) -> void:
 	box.set_anchors_preset(Control.PRESET_CENTER)
 	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	box.grow_vertical = Control.GROW_DIRECTION_BOTH
-	box.add_theme_constant_override("separation", 16)
+	box.add_theme_constant_override("separation", 14)
 	layer.add_child(box)
 
 	var text := Label.new()
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	text.add_theme_font_size_override("font_size", 30)
-	if success:
-		text.text = "Блюдо подано!\n%s\nЗвёзды: %d из 3\nВремя: %d с\nНаграда: +%d монет" % [
-			recipe["name"], last_result["stars"], int(elapsed), last_result["reward"]
-		]
-	else:
-		text.text = "Время вышло!\nГость ушёл голодным.\nНаграды нет."
+	text.add_theme_font_size_override("font_size", 28)
+	text.text = "День %d закончен!\n%s\nПодано блюд: %d\nПотеряно заказов: %d\nЗаработано: +%d монет" % [
+		day, shift["name"], served, failed, earned
+	]
 	box.add_child(text)
 
-	var again := Button.new()
-	again.text = "Ещё раз"
-	again.custom_minimum_size = Vector2(260, 60)
-	again.add_theme_font_size_override("font_size", 24)
-	again.pressed.connect(_on_again_pressed)
-	box.add_child(again)
+	var next := Button.new()
+	next.text = "Следующая смена"
+	next.custom_minimum_size = Vector2(280, 58)
+	next.add_theme_font_size_override("font_size", 24)
+	next.pressed.connect(_on_next_shift_pressed)
+	box.add_child(next)
 
-	var menu := Button.new()
-	menu.text = "В меню"
-	menu.custom_minimum_size = Vector2(260, 60)
-	menu.add_theme_font_size_override("font_size", 24)
-	menu.pressed.connect(_on_menu_pressed)
-	box.add_child(menu)
+	var menu_button := Button.new()
+	menu_button.text = "В меню"
+	menu_button.custom_minimum_size = Vector2(280, 58)
+	menu_button.add_theme_font_size_override("font_size", 24)
+	menu_button.pressed.connect(_on_menu_pressed)
+	box.add_child(menu_button)
+
+
+func _on_next_shift_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/shift_intro.tscn")
+
+
+func _on_menu_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 
 func _on_sound_pressed() -> void:
@@ -240,16 +348,6 @@ func _on_sound_pressed() -> void:
 
 func _update_sound_button() -> void:
 	_sound_button.text = "Звук: вкл" if GameState.sound_enabled else "Звук: выкл"
-
-
-func _on_again_pressed() -> void:
-	get_tree().paused = false
-	get_tree().reload_current_scene()
-
-
-func _on_menu_pressed() -> void:
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 
 # ---------- Построение кухни ----------
@@ -275,17 +373,19 @@ func _add_block(rect: Rect2, color: Color, art_name: String) -> void:
 	add_child(block)
 
 
-# Ящики по рецепту, столы, станции, сборка и раздача
+# Ящики для всех блюд смены, столы, станции, сборка и раздача
 func _build_stations() -> void:
 	var ingredients := RecipeLoader.load_ingredients()
-	var ids: Array = recipe.get("ingredients", [])
+	var ids := RecipeLoader.ingredients_for(menu)
 
-	# Ящики в ряд вдоль верхнего стола, по центру
-	var cell := 110.0
+	# Ящики в ряд вдоль верхнего стола, по центру. Если их много, делаем уже.
+	var cell := minf(110.0, 880.0 / maxf(1.0, ids.size()))
+	var crate_width := minf(96.0, cell - 8.0)
 	var start := 40.0 + (880.0 - ids.size() * cell) / 2.0
 	for i in ids.size():
 		var crate := Crate.new()
-		crate.setup_crate(ids[i], ingredients.get(ids[i], {}), Rect2(start + i * cell + 7, 4, 96, 62))
+		crate.setup_crate(ids[i], ingredients.get(ids[i], {}),
+				Rect2(start + i * cell + (cell - crate_width) / 2.0, 4, crate_width, 62))
 		_add_station(crate)
 
 	# Столы
@@ -310,17 +410,18 @@ func _build_stations() -> void:
 	stove.set_art(Icons.kitchen("stove"))
 	_add_station(stove)
 
-	# Сборка блюда (снизу по центру) и раздача (на правой стене)
+	# Сборка блюд (снизу по центру) и раздача (на правой стене)
 	assembly = AssemblyStation.new()
 	assembly.setup(Rect2(400, 430, 160, 70), Color("f3e9d2"), "Сборка")
 	assembly.set_art(Icons.kitchen("assembly"))
-	assembly.logic = logic
+	assembly.setup_menu(menu)
 	_add_station(assembly)
 
 	serve_window = ServeWindow.new()
 	serve_window.setup(Rect2(870, 120, 70, 160), Color("fbbf24"), "Раздача")
 	serve_window.set_art(Icons.kitchen("serve"))
 	serve_window.label_y = 24.0
+	serve_window.orders = orders
 	serve_window.served.connect(_on_served)
 	_add_station(serve_window)
 
@@ -336,42 +437,50 @@ func _add_station(station: Station) -> void:
 	stations.append(station)
 
 
-# Экранный слой: карточка заказа, подсказка, кнопка «Меню», джойстик, кнопка действия
+# Экранный слой: билеты заказов, подсказки, кнопки, джойстик
 func _build_interface() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 
-	# Карточка заказа слева
+	# Ряд билетов заказов под верхним столом
+	_ticket_row = Control.new()
+	_ticket_row.position = Vector2(24, 76)
+	_ticket_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(_ticket_row)
+
+	# Карточка-подсказка слева: что нужно для блюда
 	var card := ColorRect.new()
 	card.color = Color(1, 1, 1, 0.82)
-	card.position = Vector2(24, 82)
-	card.size = Vector2(180, 262)
+	card.position = Vector2(24, 138)
+	card.size = Vector2(180, 190)
 	layer.add_child(card)
 
-	var name_label := Label.new()
-	name_label.text = recipe["name"]
-	name_label.position = Vector2(8, 4)
-	name_label.add_theme_font_size_override("font_size", 20)
-	name_label.add_theme_color_override("font_color", Color("3b2a1a"))
-	card.add_child(name_label)
+	_detail_title = Label.new()
+	_detail_title.position = Vector2(8, 4)
+	_detail_title.size = Vector2(166, 24)
+	_detail_title.clip_text = true
+	_detail_title.add_theme_font_size_override("font_size", 15)
+	_detail_title.add_theme_color_override("font_color", Color("3b2a1a"))
+	card.add_child(_detail_title)
 
-	_timer_label = Label.new()
-	_timer_label.position = Vector2(8, 30)
-	_timer_label.add_theme_font_size_override("font_size", 18)
-	card.add_child(_timer_label)
+	_detail_label = Label.new()
+	_detail_label.position = Vector2(8, 28)
+	_detail_label.size = Vector2(166, 156)
+	_detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_label.add_theme_font_size_override("font_size", 13)
+	_detail_label.add_theme_color_override("font_color", Color("3b2a1a"))
+	card.add_child(_detail_label)
 
-	_order_label = Label.new()
-	_order_label.position = Vector2(8, 58)
-	_order_label.size = Vector2(166, 194)
-	_order_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	# Много шагов (рататуй): пишем мельче, чтобы список влез в карточку
-	_order_label.add_theme_font_size_override("font_size", 13 if recipe["steps"].size() <= 8 else 11)
-	_order_label.add_theme_color_override("font_color", Color("3b2a1a"))
-	card.add_child(_order_label)
+	# Время смены и счёт
+	_shift_label = Label.new()
+	_shift_label.position = Vector2(700, 124)
+	_shift_label.add_theme_font_size_override("font_size", 18)
+	_shift_label.add_theme_color_override("font_color", Color("3b2a1a"))
+	layer.add_child(_shift_label)
 
 	# Подсказка: что произойдёт по кнопке действия
 	_hint_label = Label.new()
-	_hint_label.position = Vector2(230, 78)
+	_hint_label.position = Vector2(220, 170)
 	_hint_label.size = Vector2(450, 50)
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.add_theme_font_size_override("font_size", 19)

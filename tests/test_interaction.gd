@@ -18,9 +18,9 @@ func _init() -> void:
 
 	# Берём рецепт «Луковый суп»
 	var game_state = root.get_node("GameState")
-	for recipe in RecipeLoader.load_recipes():
-		if recipe["id"] == "onion_soup":
-			game_state.current_recipe = recipe
+	for shift in RecipeLoader.load_shifts():
+		if shift["id"] == "classic":
+			game_state.current_shift = shift
 
 	var kitchen: Node2D = load("res://scenes/kitchen.tscn").instantiate()
 	root.add_child(kitchen)
@@ -29,7 +29,7 @@ func _init() -> void:
 	var chef: Chef = kitchen.chef
 
 	var crates: Array = kitchen.stations.filter(func(s): return s is Crate)
-	check(crates.size() == 6, "для супа поставлено 6 ящиков")
+	check(crates.size() == 11, "для смены «Классика» поставлено 11 ящиков")
 
 	print("Ящик")
 	var crate: Crate = crates[0]

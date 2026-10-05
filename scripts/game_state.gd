@@ -11,8 +11,11 @@ var coins: int = 0
 # Включён ли звук (запоминается в сохранении)
 var sound_enabled: bool = true
 
-# Рецепт, который игрок выбрал для готовки
-var current_recipe: Dictionary = {}
+# Номер игрового дня. Каждый день своя смена с новым меню (смены идут по кругу)
+var day: int = 1
+
+# Смена, которая сейчас идёт
+var current_shift: Dictionary = {}
 
 
 func _ready() -> void:
@@ -25,8 +28,22 @@ func add_coins(amount: int) -> void:
 	save_game()
 
 
+# Смена на сегодня: смены идут по кругу, по одной в день
+func pick_shift() -> Dictionary:
+	var shifts := RecipeLoader.load_shifts()
+	if shifts.is_empty():
+		return {}
+	return shifts[(day - 1) % shifts.size()]
+
+
+# Смена закончена: наступает следующий день
+func finish_shift() -> void:
+	day += 1
+	save_game()
+
+
 func save_game() -> void:
-	SaveGame.write({"coins": coins, "sound": sound_enabled}, save_path)
+	SaveGame.write({"coins": coins, "sound": sound_enabled, "day": day}, save_path)
 
 
 # Загрузить сохранение. Если его нет, начинаем с 0 монет.
@@ -35,3 +52,4 @@ func load_game() -> void:
 	# int(...) нужен, потому что JSON хранит числа как дробные
 	coins = maxi(0, int(data.get("coins", 0)))
 	sound_enabled = bool(data.get("sound", true))
+	day = maxi(1, int(data.get("day", 1)))
