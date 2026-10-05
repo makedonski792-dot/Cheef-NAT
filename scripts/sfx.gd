@@ -5,9 +5,9 @@ extends Node
 # Файлы лежат в audio/ (создаются tools/make_sounds.py, можно заменить своими).
 
 const SOUNDS := ["chop", "sizzle", "pickup", "drop", "add", "reject", "done", "alarm",
-		"burnt", "serve_bell", "success", "fail", "ambient"]
+		"burnt", "serve_bell", "success", "fail"]
 # Зацикленные звуки и их громкость (дБ)
-const LOOPS := {"sizzle": -9.0, "ambient": -17.0}
+const LOOPS := {"sizzle": -9.0}
 const SILENT_DB := -50.0
 const POOL_SIZE := 8
 

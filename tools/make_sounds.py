@@ -229,52 +229,6 @@ def make_fail():
     save("fail", fade_edges(track), 0.7)
 
 
-def clink(base):
-    """Звон стекла или посуды."""
-    return tone(base, 0.35, 22, 0.35, ((1, 1), (2.32, 0.55), (3.9, 0.3), (5.4, 0.15)))
-
-
-def make_ambient():
-    """Гул ресторана: приглушённый шум зала без тонов, звон посуды. Петля 10 секунд.
-
-    Голоса сделаны шумом, а не звуками с высотой: так они не превращаются в «мяуканье».
-    """
-    d = 10.0
-    xf = 1.0
-    n = n_samples(d + xf)
-
-    def band(x, low_a, high_a):
-        """Полоса частот: оставляем середину (как далёкая речь)."""
-        return [a - b for a, b in zip(lowpass(x, low_a), lowpass(x, high_a))]
-
-    track = [0.0] * n
-    # Несколько «групп людей»: каждая это шум своей полосы, громкость которого
-    # неровно плавает (слоги и паузы, но без какой-либо высоты тона)
-    for low_a, high_a, weight in ((0.20, 0.03, 1.0), (0.14, 0.02, 1.0), (0.28, 0.05, 0.7), (0.10, 0.015, 0.9)):
-        voice = band(noise(d + xf), low_a, high_a)
-        steps = []
-        while len(steps) < n:
-            steps.extend([rng.choice([0.2, 0.5, 0.8, 1.0, 1.0])] * n_samples(rng.uniform(0.15, 0.5)))
-        env = lowpass(steps[:n], 0.0012)
-        track = add(track, [v * e * weight for v, e in zip(voice, env)])
-
-    # Общий низкий гул зала
-    rumble = lowpass(noise(d + xf), 0.012)
-    track = add(scale(track, 1.0), scale(rumble, 0.9))
-
-    # Звон бокалов и вилок в случайные моменты
-    t = rng.uniform(0.3, 1.0)
-    while t < d + xf - 0.5:
-        base = rng.uniform(2300, 4300)
-        place(track, scale(clink(base), 1.6), t)
-        if rng.random() < 0.35:   # иногда несколько звяков подряд
-            for k in range(1, rng.randint(2, 3)):
-                place(track, scale(clink(base * rng.uniform(0.9, 1.25)), 1.1), t + k * rng.uniform(0.07, 0.14))
-        t += rng.uniform(1.0, 3.0)
-
-    save("ambient", make_loop(track, d, xf), 0.75)
-
-
 if __name__ == "__main__":
     make_chop()
     make_sizzle()
@@ -288,4 +242,3 @@ if __name__ == "__main__":
     make_serve_bell()
     make_success()
     make_fail()
-    make_ambient()

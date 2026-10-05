@@ -57,11 +57,6 @@ func _ready() -> void:
 	_refresh_order()
 
 
-# Гул ресторана, пока мы на кухне
-func _enter_tree() -> void:
-	Sound.set_loop("ambient", true)
-
-
 # Уходя с кухни, выключаем все зацикленные звуки
 func _exit_tree() -> void:
 	Sound.stop_loops()
@@ -89,7 +84,6 @@ func _process(delta: float) -> void:
 			chopping = true
 	chef.working = chopping
 	Sound.set_loop("sizzle", cooking)
-	Sound.set_loop("ambient", true)
 
 	# Ищем ближайшее место, с которым можно что-то сделать, и подсвечиваем его
 	var target := find_station()
