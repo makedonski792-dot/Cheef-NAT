@@ -6,9 +6,12 @@ const COOK_SECONDS := 4.0   # до готовности
 const BURN_SECONDS := 5.0   # от готовности до пригорания
 
 
-# Принимает сырое или нарезанное, что можно греть
+# Принимает то, что можно греть. Если продукт режется (лук, багет…),
+# его сначала надо нарезать. Если не режется (масло, бульон), годится сырой.
 func accepts(item: FoodItem) -> bool:
-	return item.can("heat") and (item.state == "raw" or item.state == "chopped")
+	if not item.can("heat"):
+		return false
+	return item.state == "chopped" or (item.state == "raw" and not item.can("chop"))
 
 
 func step_duration(item: FoodItem) -> float:

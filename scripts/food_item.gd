@@ -9,6 +9,8 @@ var name: String
 var color: Color
 var state := "raw"
 var info: Dictionary
+# Готовое блюдо, собранное на станции «Сборка» (его несут на раздачу)
+var is_dish := false
 
 
 # ingredient_id — id из ingredients.json, ingredient_info — запись этого ингредиента
@@ -24,13 +26,18 @@ func can(flag: String) -> bool:
 	return info.get(flag, false)
 
 
+# Пометка состояния для названия: " (нарезка)", " (готово)", " (сгорело)"
+static func state_suffix(item_state: String) -> String:
+	match item_state:
+		"chopped":
+			return " (нарезка)"
+		"cooked":
+			return " (готово)"
+		"burnt":
+			return " (сгорело)"
+	return ""
+
+
 # Название с пометкой состояния, например «Лук (нарезка)»
 func display_name() -> String:
-	match state:
-		"chopped":
-			return "%s (нарезка)" % name
-		"cooked":
-			return "%s (готово)" % name
-		"burnt":
-			return "%s (сгорело)" % name
-	return name
+	return name + state_suffix(state)

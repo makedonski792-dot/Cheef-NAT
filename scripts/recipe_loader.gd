@@ -57,6 +57,10 @@ static func _is_valid(recipe: Dictionary, file_name: String) -> bool:
 	var step_ids := {}
 	for step in recipe["steps"]:
 		step_ids[step["id"]] = true
+		# Каждый шаг — это подготовленный продукт, который кладут в блюдо
+		if not step.has("item") or not step["item"].has("id") or not step["item"].has("state"):
+			push_error("В %s у шага '%s' нет поля item {id, state}" % [file_name, step["id"]])
+			return false
 
 	for step in recipe["steps"]:
 		for dep in step.get("requires", []) + step.get("blocked_by", []):

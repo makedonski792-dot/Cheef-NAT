@@ -3,7 +3,7 @@
 	"butter": {"name": "Сливочное масло", "emoji": "🧈", "color": "#f6e27a", "heat": true},
 	"beef_broth": {"name": "Говяжий бульон", "emoji": "🍲", "color": "#8a5a2b", "heat": true},
 	"white_wine": {"name": "Белое вино", "emoji": "🍷", "color": "#e8e3a0", "heat": true},
-	"baguette": {"name": "Багет", "emoji": "🥖", "color": "#d9a65a", "chop": true},
+	"baguette": {"name": "Багет", "emoji": "🥖", "color": "#d9a65a", "chop": true, "heat": true},
 	"gruyere": {"name": "Сыр грюйер", "emoji": "🧀", "color": "#f2c94c", "chop": true},
 	"eggplant": {"name": "Баклажан", "emoji": "🍆", "color": "#5b2a6e", "chop": true, "heat": true},
 	"zucchini": {"name": "Кабачок", "emoji": "🥒", "color": "#4f8f3a", "chop": true, "heat": true},

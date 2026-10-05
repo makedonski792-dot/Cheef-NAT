@@ -93,9 +93,28 @@ func is_finished() -> bool:
 	return not finished_variant().is_empty()
 
 
-# Эталонное время приготовления в секундах
+# Можно ли сделать шаг так, чтобы блюдо не испортилось
+# (после шага должен остаться хотя бы один возможный вариант)
+func can_do_safely(step_id: String) -> bool:
+	if not can_do(step_id):
+		return false
+	var after: Array = done.duplicate()
+	after.append(step_id)
+	for variant in recipe["variants"]:
+		var fits := true
+		for id in after:
+			if not (id in variant["needs"]):
+				fits = false
+				break
+		if fits:
+			return true
+	return false
+
+
+# Эталонное время приготовления в секундах (поле par_time в рецепте;
+# если его нет, считаем по числу шагов)
 func par_time() -> float:
-	return recipe["steps"].size() * PAR_SECONDS_PER_STEP
+	return float(recipe.get("par_time", recipe["steps"].size() * PAR_SECONDS_PER_STEP))
 
 
 # Оценка блюда. elapsed_seconds — сколько секунд игрок готовил.

@@ -1,5 +1,5 @@
 extends SceneTree
-# Автоматическая проверка логики готовки. Запуск из Терминала:
+# Автоматическая проверка правил рецептов. Запуск из Терминала:
 #   Godot --headless --path . --script tests/test_cooking_logic.gd
 # В конце напишет «ВСЕ ТЕСТЫ ПРОШЛИ» или перечислит, что сломалось.
 
@@ -32,15 +32,18 @@ func run_steps(cooking: CookingLogic, steps: Array) -> bool:
 
 func _init() -> void:
 	var recipes := RecipeLoader.load_recipes()
+	check(recipes.size() == 3, "загружено 3 рецепта")
 
-	print("Луковый суп: классический вариант")
+	print("Луковый суп: классический")
 	var soup := CookingLogic.new(recipe_by_id(recipes, "onion_soup"))
-	check(not soup.do_step("simmer"), "нельзя томить суп до бульона")
-	check(soup.available_steps().size() == 4, "в начале доступно 4 независимых шага")
-	var ok := run_steps(soup, ["slice_bread", "slice_onion", "melt_butter", "caramelize_onion", "add_broth"])
-	check(ok, "шаги можно делать в разном порядке")
-	check(not soup.can_do("deglaze_wine"), "вино нельзя добавить после бульона")
-	run_steps(soup, ["simmer", "toast_bread", "grate_cheese", "gratinate"])
+	check(not soup.do_step("broth"), "бульон нельзя до лука")
+	check(soup.available_steps().size() == 4, "в начале доступно 4 независимых продукта")
+	run_steps(soup, ["gruyere", "onion", "baguette"])
+	check(soup.can_do("wine") and soup.can_do("broth"), "после лука доступны вино и бульон")
+	run_steps(soup, ["broth"])
+	check(not soup.can_do("wine"), "вино нельзя после бульона")
+	check(not soup.is_finished(), "без масла суп не готов")
+	soup.do_step("butter")
 	check(soup.is_finished(), "классический суп готов")
 	var g := soup.grade(10.0)
 	check(g["stars"] == 3 and g["reward"] == 40, "быстро: 3 звезды, 40 монет")
@@ -49,32 +52,36 @@ func _init() -> void:
 	g = soup.grade(soup.par_time() * 3)
 	check(g["stars"] == 1 and g["reward"] == 24, "очень медленно: 1 звезда, 24 монеты")
 
-	print("Луковый суп: вариант с вином")
+	print("Луковый суп: с вином")
 	soup = CookingLogic.new(recipe_by_id(recipes, "onion_soup"))
-	run_steps(soup, ["slice_onion", "melt_butter", "caramelize_onion", "deglaze_wine", "add_broth", "simmer",
-			"slice_bread", "toast_bread", "grate_cheese", "gratinate"])
-	check(soup.is_finished(), "суп с вином готов")
-	check(soup.grade(10.0)["reward"] == 55, "с вином награда 40 + 15 = 55")
+	run_steps(soup, ["onion", "wine", "broth", "butter", "baguette", "gruyere"])
+	check(soup.is_finished() and soup.grade(10.0)["reward"] == 55, "с вином награда 40 + 15 = 55")
 
-	print("Рататуй: смешали два способа")
+	print("Рататуй: два способа")
 	var rata := CookingLogic.new(recipe_by_id(recipes, "ratatouille"))
-	run_steps(rata, ["heat_oil", "slice_onion", "slice_pepper", "slice_eggplant", "slice_zucchini", "slice_tomato",
-			"saute_base", "add_veg"])
-	check(not rata.is_ruined(), "пока идём по пути «тушёный» — не испорчено")
-	check(rata.possible_variants().size() == 1, "остался один возможный вариант")
-	rata.do_step("layer_veg")
-	check(rata.is_ruined(), "добавили шаг из второго способа — блюдо испорчено")
-	check(rata.grade(5.0)["reward"] == 0, "за испорченное блюдо нет монет")
+	run_steps(rata, ["oil", "onion", "pepper", "garlic", "thyme", "eggplant"])
+	check(rata.can_do("zucchini_sliced"), "по правилам шаг доступен...")
+	check(not rata.can_do_safely("zucchini_sliced"), "...но он бы испортил блюдо (смешали два способа)")
+	run_steps(rata, ["zucchini", "tomato"])
+	check(rata.is_finished() and rata.grade(10.0)["reward"] == 50, "тушёный готов: 50 монет")
 
-	print("Крем-брюле: кофейный вариант")
+	rata = CookingLogic.new(recipe_by_id(recipes, "ratatouille"))
+	run_steps(rata, ["oil", "pepper", "onion", "thyme", "garlic", "tomato_sliced", "eggplant_sliced", "zucchini_sliced"])
+	check(rata.is_finished() and rata.grade(10.0)["reward"] == 75, "байялди готов: 50 + 25 = 75")
+
+	print("Крем-брюле")
 	var cb := CookingLogic.new(recipe_by_id(recipes, "creme_brulee"))
-	check(run_steps(cb, ["heat_cream", "infuse_coffee", "whisk_yolks", "temper"]), "кофе настаиваем до смешивания")
-	check(not cb.can_do("infuse_coffee"), "кофе второй раз добавить нельзя")
-	run_steps(cb, ["strain", "bake_bath", "chill", "sugar_top"])
-	check(not cb.is_finished(), "без горелки блюдо не готово")
-	check(cb.grade(5.0)["reward"] == 0, "недоготовленное блюдо не оплачивается")
-	cb.do_step("torch")
-	check(cb.is_finished() and cb.grade(5.0)["reward"] == 55, "кофейное готово: 45 + 10 = 55")
+	check(not cb.can_do("sugar"), "сахар нельзя до желтков")
+	run_steps(cb, ["cream", "coffee", "yolks"])
+	check(not cb.can_do("coffee"), "кофе второй раз не добавить")
+	run_steps(cb, ["sugar"])
+	check(not cb.is_finished(), "без ванили не готово")
+	cb.do_step("vanilla")
+	check(cb.is_finished() and cb.grade(5.0)["reward"] == 55, "кофейный готов: 45 + 10 = 55")
+
+	cb = CookingLogic.new(recipe_by_id(recipes, "creme_brulee"))
+	run_steps(cb, ["cream", "yolks"])
+	check(not cb.can_do("coffee"), "кофе после желтков нельзя")
 
 	print("")
 	if failures == 0:

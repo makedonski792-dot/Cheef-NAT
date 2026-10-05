@@ -1,33 +1,21 @@
 {
 	"id": "onion_soup",
 	"name": "Луковый суп",
-	"description": "Гость просит классический французский луковый суп с хрустящим сырным гренком.",
+	"description": "Классический французский луковый суп. Лук нужно нарезать и обжарить, багет подсушить, сыр натереть.",
 	"base_reward": 40,
+	"par_time": 120,
+	"time_limit": 200,
 	"ingredients": ["onion", "butter", "beef_broth", "white_wine", "baguette", "gruyere"],
 	"steps": [
-		{"id": "slice_onion", "text": "Тонко нарезать лук", "requires": []},
-		{"id": "melt_butter", "text": "Растопить масло в кастрюле", "requires": []},
-		{"id": "slice_bread", "text": "Нарезать багет ломтиками", "requires": []},
-		{"id": "grate_cheese", "text": "Натереть грюйер", "requires": []},
-		{"id": "caramelize_onion", "text": "Карамелизировать лук до золотистого цвета", "requires": ["slice_onion", "melt_butter"]},
-		{"id": "deglaze_wine", "text": "Добавить белое вино и выпарить", "requires": ["caramelize_onion"], "blocked_by": ["add_broth"]},
-		{"id": "add_broth", "text": "Влить говяжий бульон", "requires": ["caramelize_onion"]},
-		{"id": "simmer", "text": "Томить суп на слабом огне", "requires": ["add_broth"]},
-		{"id": "toast_bread", "text": "Подсушить багет в духовке", "requires": ["slice_bread"]},
-		{"id": "gratinate", "text": "Запечь суп с гренком и сыром под грилем", "requires": ["simmer", "toast_bread", "grate_cheese"]}
+		{"id": "onion", "text": "Обжаренный лук", "item": {"id": "onion", "state": "cooked"}, "requires": []},
+		{"id": "butter", "text": "Растопленное масло", "item": {"id": "butter", "state": "cooked"}, "requires": []},
+		{"id": "baguette", "text": "Подсушенный багет", "item": {"id": "baguette", "state": "cooked"}, "requires": []},
+		{"id": "gruyere", "text": "Тёртый сыр", "item": {"id": "gruyere", "state": "chopped"}, "requires": []},
+		{"id": "broth", "text": "Горячий бульон", "item": {"id": "beef_broth", "state": "cooked"}, "requires": ["onion"]},
+		{"id": "wine", "text": "Горячее вино", "item": {"id": "white_wine", "state": "cooked"}, "requires": ["onion"], "blocked_by": ["broth"]}
 	],
 	"variants": [
-		{
-			"id": "classic",
-			"name": "Классический",
-			"needs": ["slice_onion", "melt_butter", "slice_bread", "grate_cheese", "caramelize_onion", "add_broth", "simmer", "toast_bread", "gratinate"],
-			"bonus": 0
-		},
-		{
-			"id": "with_wine",
-			"name": "С белым вином",
-			"needs": ["slice_onion", "melt_butter", "slice_bread", "grate_cheese", "caramelize_onion", "deglaze_wine", "add_broth", "simmer", "toast_bread", "gratinate"],
-			"bonus": 15
-		}
+		{"id": "classic", "name": "Классический", "needs": ["onion", "butter", "baguette", "gruyere", "broth"], "bonus": 0},
+		{"id": "with_wine", "name": "С белым вином", "needs": ["onion", "butter", "baguette", "gruyere", "wine", "broth"], "bonus": 15}
 	]
 }

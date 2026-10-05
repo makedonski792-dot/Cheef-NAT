@@ -1,35 +1,26 @@
 {
 	"id": "ratatouille",
 	"name": "Рататуй",
-	"description": "Гость хочет овощное блюдо из Прованса. Можно потушить овощи по-деревенски или выложить их красивой спиралью.",
+	"description": "Овощное блюдо из Прованса. Овощи можно потушить по-деревенски или выложить сырыми ломтиками (байялди).",
 	"base_reward": 50,
+	"par_time": 180,
+	"time_limit": 280,
 	"ingredients": ["eggplant", "zucchini", "tomato", "bell_pepper", "onion", "garlic", "olive_oil", "thyme"],
 	"steps": [
-		{"id": "slice_eggplant", "text": "Нарезать баклажан", "requires": []},
-		{"id": "slice_zucchini", "text": "Нарезать кабачок", "requires": []},
-		{"id": "slice_tomato", "text": "Нарезать помидоры", "requires": []},
-		{"id": "slice_pepper", "text": "Нарезать болгарский перец", "requires": []},
-		{"id": "slice_onion", "text": "Нарезать лук и чеснок", "requires": []},
-		{"id": "heat_oil", "text": "Разогреть оливковое масло", "requires": []},
-		{"id": "saute_base", "text": "Обжарить лук, чеснок и перец", "requires": ["heat_oil", "slice_onion", "slice_pepper"]},
-		{"id": "add_veg", "text": "Добавить баклажан, кабачок и помидоры", "requires": ["saute_base", "slice_eggplant", "slice_zucchini", "slice_tomato"]},
-		{"id": "stew", "text": "Тушить овощи под крышкой", "requires": ["add_veg"]},
-		{"id": "layer_veg", "text": "Выложить овощи спиралью поверх соуса", "requires": ["saute_base", "slice_eggplant", "slice_zucchini", "slice_tomato"]},
-		{"id": "bake", "text": "Запечь в духовке", "requires": ["layer_veg"]},
-		{"id": "add_thyme", "text": "Посыпать тимьяном", "requires": ["saute_base"]}
+		{"id": "oil", "text": "Горячее оливковое масло", "item": {"id": "olive_oil", "state": "cooked"}, "requires": []},
+		{"id": "onion", "text": "Обжаренный лук", "item": {"id": "onion", "state": "cooked"}, "requires": ["oil"]},
+		{"id": "pepper", "text": "Обжаренный перец", "item": {"id": "bell_pepper", "state": "cooked"}, "requires": ["oil"]},
+		{"id": "garlic", "text": "Обжаренный чеснок", "item": {"id": "garlic", "state": "cooked"}, "requires": ["oil"]},
+		{"id": "thyme", "text": "Рубленый тимьян", "item": {"id": "thyme", "state": "chopped"}, "requires": []},
+		{"id": "eggplant", "text": "Тушёный баклажан", "item": {"id": "eggplant", "state": "cooked"}, "requires": ["onion", "pepper"]},
+		{"id": "zucchini", "text": "Тушёный кабачок", "item": {"id": "zucchini", "state": "cooked"}, "requires": ["onion", "pepper"]},
+		{"id": "tomato", "text": "Тушёный помидор", "item": {"id": "tomato", "state": "cooked"}, "requires": ["onion", "pepper"]},
+		{"id": "eggplant_sliced", "text": "Баклажан ломтиками", "item": {"id": "eggplant", "state": "chopped"}, "requires": ["onion", "pepper"]},
+		{"id": "zucchini_sliced", "text": "Кабачок ломтиками", "item": {"id": "zucchini", "state": "chopped"}, "requires": ["onion", "pepper"]},
+		{"id": "tomato_sliced", "text": "Помидор ломтиками", "item": {"id": "tomato", "state": "chopped"}, "requires": ["onion", "pepper"]}
 	],
 	"variants": [
-		{
-			"id": "stewed",
-			"name": "Тушёный (деревенский)",
-			"needs": ["slice_eggplant", "slice_zucchini", "slice_tomato", "slice_pepper", "slice_onion", "heat_oil", "saute_base", "add_veg", "stew", "add_thyme"],
-			"bonus": 0
-		},
-		{
-			"id": "byaldi",
-			"name": "Конфи байялди (спиралью)",
-			"needs": ["slice_eggplant", "slice_zucchini", "slice_tomato", "slice_pepper", "slice_onion", "heat_oil", "saute_base", "layer_veg", "bake", "add_thyme"],
-			"bonus": 25
-		}
+		{"id": "stewed", "name": "Тушёный (деревенский)", "needs": ["oil", "onion", "pepper", "garlic", "thyme", "eggplant", "zucchini", "tomato"], "bonus": 0},
+		{"id": "byaldi", "name": "Конфи байялди (ломтиками)", "needs": ["oil", "onion", "pepper", "garlic", "thyme", "eggplant_sliced", "zucchini_sliced", "tomato_sliced"], "bonus": 25}
 	]
 }

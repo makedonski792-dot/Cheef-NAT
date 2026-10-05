@@ -1,32 +1,20 @@
 {
 	"id": "creme_brulee",
 	"name": "Крем-брюле",
-	"description": "Десерт для гостя: нежный ванильный крем и хрустящая карамельная корочка.",
+	"description": "Нежный ванильный крем. Если настоять сливки с кофе до того, как добавишь желтки, получится кофейный вариант.",
 	"base_reward": 45,
+	"par_time": 90,
+	"time_limit": 160,
 	"ingredients": ["cream", "egg_yolk", "sugar", "vanilla", "coffee"],
 	"steps": [
-		{"id": "heat_cream", "text": "Нагреть сливки с ванилью", "requires": []},
-		{"id": "infuse_coffee", "text": "Настоять сливки с кофейными зёрнами", "requires": ["heat_cream"], "blocked_by": ["temper"]},
-		{"id": "whisk_yolks", "text": "Взбить желтки с сахаром", "requires": []},
-		{"id": "temper", "text": "Влить горячие сливки в желтки тонкой струйкой", "requires": ["heat_cream", "whisk_yolks"]},
-		{"id": "strain", "text": "Процедить крем", "requires": ["temper"]},
-		{"id": "bake_bath", "text": "Запечь на водяной бане", "requires": ["strain"]},
-		{"id": "chill", "text": "Охладить в холодильнике", "requires": ["bake_bath"]},
-		{"id": "sugar_top", "text": "Посыпать сахаром сверху", "requires": ["chill"]},
-		{"id": "torch", "text": "Карамелизировать корочку горелкой", "requires": ["sugar_top"]}
+		{"id": "cream", "text": "Горячие сливки", "item": {"id": "cream", "state": "cooked"}, "requires": []},
+		{"id": "vanilla", "text": "Ваниль", "item": {"id": "vanilla", "state": "raw"}, "requires": []},
+		{"id": "yolks", "text": "Яичные желтки", "item": {"id": "egg_yolk", "state": "raw"}, "requires": []},
+		{"id": "sugar", "text": "Сахар (после желтков)", "item": {"id": "sugar", "state": "raw"}, "requires": ["yolks"]},
+		{"id": "coffee", "text": "Кофе (до желтков)", "item": {"id": "coffee", "state": "raw"}, "requires": ["cream"], "blocked_by": ["yolks"]}
 	],
 	"variants": [
-		{
-			"id": "vanilla",
-			"name": "Классический ванильный",
-			"needs": ["heat_cream", "whisk_yolks", "temper", "strain", "bake_bath", "chill", "sugar_top", "torch"],
-			"bonus": 0
-		},
-		{
-			"id": "coffee",
-			"name": "Кофейный",
-			"needs": ["heat_cream", "infuse_coffee", "whisk_yolks", "temper", "strain", "bake_bath", "chill", "sugar_top", "torch"],
-			"bonus": 10
-		}
+		{"id": "vanilla", "name": "Классический ванильный", "needs": ["cream", "vanilla", "yolks", "sugar"], "bonus": 0},
+		{"id": "coffee", "name": "Кофейный", "needs": ["cream", "coffee", "vanilla", "yolks", "sugar"], "bonus": 10}
 	]
 }
