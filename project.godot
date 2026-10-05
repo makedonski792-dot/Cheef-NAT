@@ -18,6 +18,11 @@ config/name="Французский шеф"
 run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.7")
 
+[autoload]
+
+; Общее хранилище данных игры (монеты, выбранный рецепт). Доступно из любого скрипта как GameState
+GameState="*res://scripts/game_state.gd"
+
 [display]
 
 window/size/viewport_width=540

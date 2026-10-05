@@ -2,11 +2,6 @@ extends Control
 # Главное меню: название игры, счётчик монет и кнопка «Готовить».
 # Интерфейс собираем кодом, так проще читать и менять.
 
-# Пока монеты просто число. В шаге 5 они будут сохраняться между запусками.
-var coins: int = 0
-
-var _info_label: Label
-
 
 func _ready() -> void:
 	# Фон цвета тёплого кремового
@@ -31,7 +26,7 @@ func _ready() -> void:
 	column.add_child(title)
 
 	var coins_label := Label.new()
-	coins_label.text = "Монеты: %d" % coins
+	coins_label.text = "Монеты: %d" % GameState.coins
 	coins_label.add_theme_font_size_override("font_size", 28)
 	coins_label.add_theme_color_override("font_color", Color("8a5a00"))
 	coins_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -44,20 +39,7 @@ func _ready() -> void:
 	cook_button.pressed.connect(_on_cook_pressed)
 	column.add_child(cook_button)
 
-	# Строка для сообщений игроку (пока там заглушка)
-	_info_label = Label.new()
-	_info_label.add_theme_color_override("font_color", Color("3b2a1a"))
-	_info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(_info_label)
 
-
-# Вызывается при нажатии на кнопку «Готовить»
+# Вызывается при нажатии на кнопку «Готовить»: открываем выбор рецепта
 func _on_cook_pressed() -> void:
-	# Временная проверка шага 2: показываем, какие рецепты загрузились
-	var recipes := RecipeLoader.load_recipes()
-	var lines: Array[String] = []
-	for recipe in recipes:
-		lines.append("%s: шагов %d, вариантов %d, награда %d" % [
-			recipe["name"], recipe["steps"].size(), recipe["variants"].size(), recipe["base_reward"]
-		])
-	_info_label.text = "Загружено рецептов: %d\n%s" % [recipes.size(), "\n".join(lines)]
+	get_tree().change_scene_to_file("res://scenes/recipe_select.tscn")
