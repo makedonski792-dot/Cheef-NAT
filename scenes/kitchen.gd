@@ -28,6 +28,7 @@ var _hint_label: Label
 var _action_button: ActionButton
 var _timer_label: Label
 var _order_label: Label
+var _sound_button: Button
 
 
 func _ready() -> void:
@@ -56,6 +57,16 @@ func _ready() -> void:
 	_refresh_order()
 
 
+# Гул ресторана, пока мы на кухне
+func _enter_tree() -> void:
+	Sound.set_loop("ambient", true)
+
+
+# Уходя с кухни, выключаем все зацикленные звуки
+func _exit_tree() -> void:
+	Sound.stop_loops()
+
+
 func _process(delta: float) -> void:
 	if ended:
 		return
@@ -67,6 +78,18 @@ func _process(delta: float) -> void:
 	if left <= 0.0:
 		_end(false)
 		return
+
+	# Звуки и анимация работы: шкворчание, пока что-то готовится; повар «рубит» у доски
+	var cooking := false
+	var chopping := false
+	for station in stations:
+		if station is Stove and station.is_working():
+			cooking = true
+		elif station is CuttingBoard and station.is_working():
+			chopping = true
+	chef.working = chopping
+	Sound.set_loop("sizzle", cooking)
+	Sound.set_loop("ambient", true)
 
 	# Ищем ближайшее место, с которым можно что-то сделать, и подсвечиваем его
 	var target := find_station()
@@ -107,6 +130,9 @@ func do_action() -> void:
 	if target != null:
 		target.interact(chef)
 		_refresh_order()
+	else:
+		# Делать нечего: тихий «нельзя»
+		Sound.play("reject", -8.0)
 
 
 # Ближайшее место, где у повара есть доступное действие (или null)
@@ -163,6 +189,8 @@ func _on_served(_item: FoodItem) -> void:
 func _end(success: bool) -> void:
 	ended = true
 	get_tree().paused = true
+	Sound.stop_loops()
+	Sound.play("success" if success else "fail")
 	_show_overlay(success)
 
 
@@ -209,6 +237,15 @@ func _show_overlay(success: bool) -> void:
 	menu.add_theme_font_size_override("font_size", 24)
 	menu.pressed.connect(_on_menu_pressed)
 	box.add_child(menu)
+
+
+func _on_sound_pressed() -> void:
+	Sound.set_enabled(not GameState.sound_enabled)
+	_update_sound_button()
+
+
+func _update_sound_button() -> void:
+	_sound_button.text = "Звук: вкл" if GameState.sound_enabled else "Звук: выкл"
 
 
 func _on_again_pressed() -> void:
@@ -341,7 +378,7 @@ func _build_interface() -> void:
 	# Подсказка: что произойдёт по кнопке действия
 	_hint_label = Label.new()
 	_hint_label.position = Vector2(230, 78)
-	_hint_label.size = Vector2(560, 50)
+	_hint_label.size = Vector2(450, 50)
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.add_theme_font_size_override("font_size", 19)
 	_hint_label.add_theme_color_override("font_color", Color("8a3b00"))
@@ -357,6 +394,18 @@ func _build_interface() -> void:
 	menu_button.offset_top = 78
 	menu_button.pressed.connect(_on_menu_pressed)
 	layer.add_child(menu_button)
+
+	# Кнопка включения и выключения звука
+	_sound_button = Button.new()
+	_sound_button.custom_minimum_size = Vector2(120, 36)
+	_sound_button.anchor_left = 1.0
+	_sound_button.anchor_right = 1.0
+	_sound_button.offset_left = -260
+	_sound_button.offset_right = -140
+	_sound_button.offset_top = 78
+	_sound_button.pressed.connect(_on_sound_pressed)
+	layer.add_child(_sound_button)
+	_update_sound_button()
 
 	joystick = ScreenJoystick.new()
 	layer.add_child(joystick)

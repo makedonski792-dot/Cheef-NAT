@@ -23,6 +23,8 @@ config/icon="res://icon.svg"
 
 ; Общее хранилище данных игры (монеты, выбранный рецепт). Доступно из любого скрипта как GameState
 GameState="*res://scripts/game_state.gd"
+; Звуки игры (Sfx.play("chop") и т.д.)
+Sfx="*res://scripts/sfx.gd"
 
 [display]
 

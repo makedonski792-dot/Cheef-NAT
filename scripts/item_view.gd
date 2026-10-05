@@ -14,6 +14,7 @@ const BURNT_TINT := Color(0.18, 0.14, 0.14)
 var label_offset := -48.0
 
 var _item: FoodItem
+var _shown_state := ""
 var _label: Label
 
 
@@ -32,10 +33,23 @@ func _ready() -> void:
 
 # Показать предмет (или null, чтобы убрать). Вызываем и после смены состояния.
 func set_item(item: FoodItem) -> void:
+	# Подпрыгиваем, когда предмет появился или изменился (нарезан, приготовлен)
+	var changed := item != null and (item != _item or item.state != _shown_state)
 	_item = item
+	_shown_state = item.state if item != null else ""
 	if _label != null:
 		_refresh()
 	queue_redraw()
+	if changed and is_inside_tree():
+		_pop()
+
+
+# Короткая анимация «пружинки»: предмет чуть увеличивается и возвращается
+func _pop() -> void:
+	scale = Vector2(1.45, 1.45)
+	var tween := create_tween()
+	tween.tween_property(self, "scale", Vector2.ONE, 0.28) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _refresh() -> void:

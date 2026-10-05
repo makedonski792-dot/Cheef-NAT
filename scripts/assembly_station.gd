@@ -100,6 +100,11 @@ func interact(chef: Chef) -> void:
 		if step_id != "":
 			logic.do_step(step_id)
 			delivered.append(chef.drop())
+			Sound.play("add")
+			Fx.burst(self, Vector2(_visual_size.x / 2.0, 37.0), Color("ffe08a"), 8, 80.0, 0.5, 120.0)
+			if logic.is_finished():
+				Sound.play("done")
+				Fx.burst(self, Vector2(_visual_size.x / 2.0, 37.0), Color("fbbf24"), 18, 120.0, 0.7, 180.0)
 	elif logic != null and logic.is_finished() and not dish_taken:
 		dish_taken = true
 		delivered.clear()
@@ -119,6 +124,13 @@ func _make_dish() -> FoodItem:
 	return item
 
 
+# Пока блюдо готово и ждёт, золотая рамка пульсирует
+func _process(delta: float) -> void:
+	super._process(delta)
+	if logic != null and logic.is_finished() and not dish_taken:
+		queue_redraw()
+
+
 # На тарелке рисуем добавленные продукты (мелкие картинки в ряд),
 # а когда блюдо готово — золотую рамку и надпись
 func _draw_extra() -> void:
@@ -133,7 +145,8 @@ func _draw_extra() -> void:
 			draw_circle(center, 8.0, delivered[i].color)
 
 	if logic != null and logic.is_finished() and not dish_taken:
-		draw_rect(Rect2(Vector2.ZERO, _visual_size).grow(2), Color("fbbf24"), false, 4.0)
+		var glow := 0.7 + 0.3 * sin(Time.get_ticks_msec() / 140.0)
+		draw_rect(Rect2(Vector2.ZERO, _visual_size).grow(2), Color(0.98, 0.75, 0.14, glow), false, 4.0)
 		var font := ThemeDB.fallback_font
 		draw_string_outline(font, Vector2(0, 64), "ГОТОВО!", HORIZONTAL_ALIGNMENT_CENTER,
 				_visual_size.x, 16, 5, Color("2b2018"))

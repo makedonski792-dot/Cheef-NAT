@@ -54,6 +54,12 @@ func set_art(texture: Texture2D, tiled := false) -> void:
 	queue_redraw()
 
 
+# Пока станция подсвечена, перерисовываем каждый кадр, чтобы рамка пульсировала
+func _process(_delta: float) -> void:
+	if focused:
+		queue_redraw()
+
+
 # Расстояние от точки до этого места (0, если точка внутри)
 func distance_to(point: Vector2) -> float:
 	var nearest := Vector2(
@@ -86,7 +92,9 @@ func _draw() -> void:
 		draw_rect(rect, _fill)
 		draw_rect(rect, Color("3b2a1a"), false, 2.0)
 	if focused:
-		draw_rect(rect.grow(3), Color("ffe94d"), false, 4.0)
+		# Рамка мягко «дышит»
+		var pulse := 0.75 + 0.25 * sin(Time.get_ticks_msec() / 110.0)
+		draw_rect(rect.grow(3), Color(1.0, 0.91, 0.3, pulse), false, 4.0)
 
 	if _label != "":
 		var font := ThemeDB.fallback_font

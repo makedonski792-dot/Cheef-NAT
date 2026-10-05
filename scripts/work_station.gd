@@ -45,6 +45,26 @@ func bar_color(_item: FoodItem) -> Color:
 	return Color("4ade80")
 
 
+# Вызывается каждый кадр, пока станция реально работает (для анимации и звуков)
+func _on_work(_delta: float) -> void:
+	pass
+
+
+# Вызывается, когда закончился этап (нарезано, приготовлено, сгорело)
+func _on_step_finished(_item: FoodItem) -> void:
+	pass
+
+
+# Идёт ли работа прямо сейчас: есть предмет, есть что делать, а если нужен повар, он рядом
+func is_working() -> bool:
+	if slot == null or step_duration(slot) <= 0.0:
+		return false
+	if requires_chef and (worker == null or distance_to(worker.position) > NEAR):
+		return false
+	return true
+
+
+
 # ----- Общая логика -----
 
 func verb(chef: Chef) -> String:
@@ -75,6 +95,7 @@ func interact(chef: Chef) -> void:
 
 
 func _process(delta: float) -> void:
+	super._process(delta)
 	tick(delta)
 
 
@@ -82,16 +103,15 @@ func _process(delta: float) -> void:
 func tick(delta: float) -> void:
 	if slot == null:
 		return
-	var duration := step_duration(slot)
-	if duration <= 0.0:
-		return
-	if requires_chef and (worker == null or distance_to(worker.position) > NEAR):
+	if not is_working():
 		return
 	progress += delta
-	if progress >= duration:
+	_on_work(delta)
+	if progress >= step_duration(slot):
 		progress = 0.0
 		advance(slot)
 		_view.set_item(slot)
+		_on_step_finished(slot)
 	queue_redraw()
 
 
