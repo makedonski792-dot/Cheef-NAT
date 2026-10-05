@@ -18,6 +18,9 @@ func _init() -> void:
 	await process_frame
 
 	var game_state = root.get_node("GameState")
+	# Пишем в тестовый файл, чтобы не испортить настоящее сохранение игрока
+	game_state.save_path = "user://test_save.json"
+	game_state.coins = 0
 	for recipe in RecipeLoader.load_recipes():
 		if recipe["id"] == "onion_soup":
 			game_state.current_recipe = recipe
