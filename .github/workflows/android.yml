@@ -39,11 +39,11 @@ jobs:
           cat export.log
           if [ $code -ne 0 ] || [ ! -f build/french-chef.apk ]; then
             # Выводим причину ошибки в заметку (аннотацию), её видно без входа в аккаунт
-            errs=$(grep -iE "error|fail|invalid|not found|missing|keystore|sdk" export.log | head -15 | tr '\n' '|' | sed 's/%/%25/g')
+            errs=$(grep -v fontconfig export.log | tail -25 | tr '\n' '|' | sed 's/%/%25/g')
             echo "::error title=Export code=$code::$errs"
             settings=$(grep -ihE "android|keystore|java" ~/.config/godot/editor_settings* 2>&1 | head -10 | tr '\n' '|')
             echo "::error title=Settings::$settings"
-            echo "::error title=Files::$(ls -a ~/.config/godot /root 2>&1 | tr '\n' ' ')"
+            echo "::error title=Files::$(ls /usr/lib/android-sdk/build-tools /usr/lib/android-sdk/platforms ~/.local/share/godot/export_templates/* 2>&1 | tr '\n' ' ')"
             exit 1
           fi
 
