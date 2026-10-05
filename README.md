@@ -9,4 +9,9 @@
 3. Нажми кнопку ▶ (или F5) в правом верхнем углу.
 
 ## Состояние
-Шаг 2: рецепты и ингредиенты в JSON, загрузчик (scripts/recipe_loader.gd).
+Шаг 3: логика готовки (scripts/cooking_logic.gd) и тесты (tests/).
+
+## Проверка логики без окна
+```
+/Users/mac/Downloads/Godot.app/Contents/MacOS/Godot --headless --path . --script tests/test_cooking_logic.gd
+```
