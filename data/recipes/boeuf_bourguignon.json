@@ -1,0 +1,22 @@
+{
+	"id": "boeuf_bourguignon",
+	"name": "Бёф бургиньон",
+	"description": "Говядина, тушёная в красном вине с овощами. Сложное блюдо: вино можно лить только после мяса. С грибами вкуснее.",
+	"base_reward": 70,
+	"par_time": 220,
+	"time_limit": 480,
+	"dish_icon": "pot-stew",
+	"ingredients": ["beef", "onion", "carrot", "red_wine", "beef_broth", "mushroom"],
+	"steps": [
+		{"id": "beef", "text": "Обжаренная говядина", "item": {"id": "beef", "state": "cooked"}, "requires": []},
+		{"id": "onion", "text": "Обжаренный лук", "item": {"id": "onion", "state": "cooked"}, "requires": []},
+		{"id": "carrot", "text": "Тушёная морковь", "item": {"id": "carrot", "state": "cooked"}, "requires": []},
+		{"id": "wine", "text": "Горячее красное вино", "item": {"id": "red_wine", "state": "cooked"}, "requires": ["beef"]},
+		{"id": "broth", "text": "Горячий бульон", "item": {"id": "beef_broth", "state": "cooked"}, "requires": ["wine", "onion", "carrot"]},
+		{"id": "mushroom", "text": "Обжаренные грибы", "item": {"id": "mushroom", "state": "cooked"}, "requires": ["onion"]}
+	],
+	"variants": [
+		{"id": "classic", "name": "Классический", "needs": ["beef", "onion", "carrot", "wine", "broth"], "bonus": 0},
+		{"id": "mushrooms", "name": "С грибами", "needs": ["beef", "onion", "carrot", "wine", "broth", "mushroom"], "bonus": 15}
+	]
+}

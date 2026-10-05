@@ -5,6 +5,7 @@
 	"base_reward": 40,
 	"par_time": 120,
 	"time_limit": 320,
+	"dish_icon": "bowl-soup",
 	"ingredients": ["onion", "butter", "beef_broth", "white_wine", "baguette", "gruyere"],
 	"steps": [
 		{"id": "onion", "text": "Обжаренный лук", "item": {"id": "onion", "state": "cooked"}, "requires": []},

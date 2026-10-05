@@ -42,6 +42,14 @@ func _ready() -> void:
 		button.text = "%s\n(награда от %d монет)" % [recipe["name"], recipe["base_reward"]]
 		button.custom_minimum_size = Vector2(0, 90)
 		button.add_theme_font_size_override("font_size", 24)
+		# Картинка блюда слева от названия
+		var dish_icon := Icons.food(recipe.get("dish_icon", ""))
+		if dish_icon != null:
+			button.icon = dish_icon
+			button.expand_icon = true
+			button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			button.add_theme_constant_override("icon_max_width", 64)
+			button.add_theme_constant_override("h_separation", 16)
 		button.pressed.connect(_on_recipe_pressed.bind(recipe))
 		list.add_child(button)
 

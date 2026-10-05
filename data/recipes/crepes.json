@@ -1,0 +1,24 @@
+{
+	"id": "crepes",
+	"name": "Крепы",
+	"description": "Тонкие французские блинчики. Тесто из муки, молока и яйца, растопленное масло, сахар, а сверху лимон или клубника.",
+	"base_reward": 40,
+	"par_time": 100,
+	"time_limit": 280,
+	"dish_icon": "pancakes",
+	"ingredients": ["flour", "milk", "egg", "butter", "sugar", "lemon", "strawberry"],
+	"steps": [
+		{"id": "flour", "text": "Мука", "item": {"id": "flour", "state": "raw"}, "requires": []},
+		{"id": "milk", "text": "Молоко", "item": {"id": "milk", "state": "raw"}, "requires": []},
+		{"id": "egg", "text": "Яйцо", "item": {"id": "egg", "state": "raw"}, "requires": []},
+		{"id": "butter", "text": "Растопленное масло", "item": {"id": "butter", "state": "cooked"}, "requires": []},
+		{"id": "sugar", "text": "Сахар (после теста)", "item": {"id": "sugar", "state": "raw"}, "requires": ["flour", "milk", "egg", "butter"]},
+		{"id": "lemon", "text": "Лимон дольками", "item": {"id": "lemon", "state": "chopped"}, "requires": ["sugar"]},
+		{"id": "strawberry", "text": "Клубника", "item": {"id": "strawberry", "state": "chopped"}, "requires": ["sugar"]}
+	],
+	"variants": [
+		{"id": "sugar", "name": "С сахаром", "needs": ["flour", "milk", "egg", "butter", "sugar"], "bonus": 0},
+		{"id": "lemon", "name": "С лимоном", "needs": ["flour", "milk", "egg", "butter", "sugar", "lemon"], "bonus": 10},
+		{"id": "strawberry", "name": "С клубникой", "needs": ["flour", "milk", "egg", "butter", "sugar", "strawberry"], "bonus": 15}
+	]
+}

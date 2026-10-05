@@ -1,0 +1,21 @@
+{
+	"id": "quiche_lorraine",
+	"name": "Киш лорен",
+	"description": "Открытый пирог с беконом, яичной заливкой и сыром. Можно добавить лук-порей.",
+	"base_reward": 55,
+	"par_time": 150,
+	"time_limit": 360,
+	"dish_icon": "pie",
+	"ingredients": ["bacon", "egg", "cream", "gruyere", "leek"],
+	"steps": [
+		{"id": "bacon", "text": "Обжаренный бекон", "item": {"id": "bacon", "state": "cooked"}, "requires": []},
+		{"id": "egg", "text": "Яйца для заливки", "item": {"id": "egg", "state": "raw"}, "requires": []},
+		{"id": "cream", "text": "Сливки (после яиц)", "item": {"id": "cream", "state": "raw"}, "requires": ["egg"]},
+		{"id": "gruyere", "text": "Тёртый сыр (после сливок)", "item": {"id": "gruyere", "state": "chopped"}, "requires": ["cream"]},
+		{"id": "leek", "text": "Обжаренный лук-порей", "item": {"id": "leek", "state": "cooked"}, "requires": ["bacon"]}
+	],
+	"variants": [
+		{"id": "lorraine", "name": "Классический лорен", "needs": ["bacon", "egg", "cream", "gruyere"], "bonus": 0},
+		{"id": "leek", "name": "С луком-пореем", "needs": ["bacon", "egg", "cream", "gruyere", "leek"], "bonus": 10}
+	]
+}

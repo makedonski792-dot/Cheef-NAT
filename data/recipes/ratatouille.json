@@ -5,6 +5,7 @@
 	"base_reward": 50,
 	"par_time": 180,
 	"time_limit": 400,
+	"dish_icon": "pan-stew",
 	"ingredients": ["eggplant", "zucchini", "tomato", "bell_pepper", "onion", "garlic", "olive_oil", "thyme"],
 	"steps": [
 		{"id": "oil", "text": "Горячее оливковое масло", "item": {"id": "olive_oil", "state": "cooked"}, "requires": []},

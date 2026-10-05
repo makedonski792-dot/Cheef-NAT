@@ -314,7 +314,7 @@ func _build_interface() -> void:
 	var card := ColorRect.new()
 	card.color = Color(1, 1, 1, 0.82)
 	card.position = Vector2(24, 82)
-	card.size = Vector2(180, 238)
+	card.size = Vector2(180, 262)
 	layer.add_child(card)
 
 	var name_label := Label.new()
@@ -331,9 +331,10 @@ func _build_interface() -> void:
 
 	_order_label = Label.new()
 	_order_label.position = Vector2(8, 58)
-	_order_label.size = Vector2(166, 170)
+	_order_label.size = Vector2(166, 194)
 	_order_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_order_label.add_theme_font_size_override("font_size", 13)
+	# Много шагов (рататуй): пишем мельче, чтобы список влез в карточку
+	_order_label.add_theme_font_size_override("font_size", 13 if recipe["steps"].size() <= 8 else 11)
 	_order_label.add_theme_color_override("font_color", Color("3b2a1a"))
 	card.add_child(_order_label)
 

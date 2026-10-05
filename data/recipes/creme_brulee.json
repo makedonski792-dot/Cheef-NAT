@@ -5,6 +5,7 @@
 	"base_reward": 45,
 	"par_time": 90,
 	"time_limit": 280,
+	"dish_icon": "pudding",
 	"ingredients": ["cream", "egg_yolk", "sugar", "vanilla", "coffee"],
 	"steps": [
 		{"id": "cream", "text": "Горячие сливки", "item": {"id": "cream", "state": "cooked"}, "requires": []},

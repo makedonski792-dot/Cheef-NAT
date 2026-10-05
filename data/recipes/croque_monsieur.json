@@ -1,0 +1,22 @@
+{
+	"id": "croque_monsieur",
+	"name": "Крок-месье",
+	"description": "Горячий сэндвич с ветчиной и сыром под соусом бешамель. Если добавить яичницу сверху, это «крок-мадам».",
+	"base_reward": 45,
+	"par_time": 110,
+	"time_limit": 300,
+	"dish_icon": "sandwich",
+	"ingredients": ["bread", "ham", "gruyere", "butter", "milk", "egg"],
+	"steps": [
+		{"id": "butter", "text": "Растопленное масло", "item": {"id": "butter", "state": "cooked"}, "requires": []},
+		{"id": "milk", "text": "Горячее молоко (бешамель)", "item": {"id": "milk", "state": "cooked"}, "requires": ["butter"]},
+		{"id": "bread", "text": "Поджаренный хлеб", "item": {"id": "bread", "state": "cooked"}, "requires": []},
+		{"id": "ham", "text": "Обжаренная ветчина", "item": {"id": "ham", "state": "cooked"}, "requires": []},
+		{"id": "gruyere", "text": "Тёртый сыр", "item": {"id": "gruyere", "state": "chopped"}, "requires": ["bread"]},
+		{"id": "egg", "text": "Яичница (для мадам)", "item": {"id": "egg", "state": "cooked"}, "requires": ["bread", "ham"]}
+	],
+	"variants": [
+		{"id": "monsieur", "name": "Крок-месье", "needs": ["butter", "milk", "bread", "ham", "gruyere"], "bonus": 0},
+		{"id": "madame", "name": "Крок-мадам", "needs": ["butter", "milk", "bread", "ham", "gruyere", "egg"], "bonus": 15}
+	]
+}

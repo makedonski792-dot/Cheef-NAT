@@ -1,0 +1,23 @@
+{
+	"id": "moules_mariniere",
+	"name": "Мидии в вине",
+	"description": "Мидии, сваренные в белом вине с луком и чесноком. Вино надо добавить до мидий. Можно подать со сливками или с багетом.",
+	"base_reward": 60,
+	"par_time": 160,
+	"time_limit": 380,
+	"dish_icon": "pan",
+	"ingredients": ["mussel", "white_wine", "garlic", "onion", "cream", "baguette"],
+	"steps": [
+		{"id": "onion", "text": "Обжаренный лук", "item": {"id": "onion", "state": "cooked"}, "requires": []},
+		{"id": "garlic", "text": "Обжаренный чеснок", "item": {"id": "garlic", "state": "cooked"}, "requires": ["onion"]},
+		{"id": "wine", "text": "Горячее белое вино (до мидий)", "item": {"id": "white_wine", "state": "cooked"}, "requires": ["onion", "garlic"], "blocked_by": ["mussel"]},
+		{"id": "mussel", "text": "Раскрывшиеся мидии", "item": {"id": "mussel", "state": "cooked"}, "requires": ["wine"]},
+		{"id": "cream", "text": "Горячие сливки", "item": {"id": "cream", "state": "cooked"}, "requires": ["mussel"]},
+		{"id": "baguette", "text": "Подсушенный багет", "item": {"id": "baguette", "state": "cooked"}, "requires": []}
+	],
+	"variants": [
+		{"id": "classic", "name": "Классические", "needs": ["onion", "garlic", "wine", "mussel"], "bonus": 0},
+		{"id": "creamy", "name": "Со сливками", "needs": ["onion", "garlic", "wine", "mussel", "cream"], "bonus": 12},
+		{"id": "bread", "name": "С багетом", "needs": ["onion", "garlic", "wine", "mussel", "baguette"], "bonus": 8}
+	]
+}

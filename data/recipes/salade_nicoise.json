@@ -1,0 +1,22 @@
+{
+	"id": "salade_nicoise",
+	"name": "Салат нисуаз",
+	"description": "Свежий салат с юга Франции: овощи, варёное яйцо и заправка из оливкового масла. С обжаренным тунцом он сытнее.",
+	"base_reward": 50,
+	"par_time": 130,
+	"time_limit": 330,
+	"dish_icon": "salad",
+	"ingredients": ["tomato", "bell_pepper", "onion", "egg", "fish", "olive_oil"],
+	"steps": [
+		{"id": "tomato", "text": "Нарезанный помидор", "item": {"id": "tomato", "state": "chopped"}, "requires": []},
+		{"id": "pepper", "text": "Нарезанный перец", "item": {"id": "bell_pepper", "state": "chopped"}, "requires": []},
+		{"id": "onion", "text": "Нарезанный лук", "item": {"id": "onion", "state": "chopped"}, "requires": []},
+		{"id": "egg", "text": "Варёное яйцо", "item": {"id": "egg", "state": "cooked"}, "requires": []},
+		{"id": "fish", "text": "Обжаренный тунец", "item": {"id": "fish", "state": "cooked"}, "requires": []},
+		{"id": "oil", "text": "Оливковое масло (в конце)", "item": {"id": "olive_oil", "state": "raw"}, "requires": ["tomato", "pepper", "onion"]}
+	],
+	"variants": [
+		{"id": "veggie", "name": "Овощной", "needs": ["tomato", "pepper", "onion", "egg", "oil"], "bonus": 0},
+		{"id": "tuna", "name": "С тунцом", "needs": ["tomato", "pepper", "onion", "egg", "fish", "oil"], "bonus": 20}
+	]
+}

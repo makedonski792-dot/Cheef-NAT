@@ -32,7 +32,7 @@ func run_steps(cooking: CookingLogic, steps: Array) -> bool:
 
 func _init() -> void:
 	var recipes := RecipeLoader.load_recipes()
-	check(recipes.size() == 3, "загружено 3 рецепта")
+	check(recipes.size() == 9, "загружено 9 рецептов")
 
 	print("Луковый суп: классический")
 	var soup := CookingLogic.new(recipe_by_id(recipes, "onion_soup"))
