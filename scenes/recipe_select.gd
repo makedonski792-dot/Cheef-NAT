@@ -56,7 +56,7 @@ func _ready() -> void:
 # Игрок выбрал рецепт: запоминаем и идём готовить
 func _on_recipe_pressed(recipe: Dictionary) -> void:
 	GameState.current_recipe = recipe
-	get_tree().change_scene_to_file("res://scenes/cooking.tscn")
+	get_tree().change_scene_to_file("res://scenes/kitchen.tscn")
 
 
 func _on_back_pressed() -> void:

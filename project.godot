@@ -26,11 +26,11 @@ GameState="*res://scripts/game_state.gd"
 
 [display]
 
-window/size/viewport_width=540
-window/size/viewport_height=960
+window/size/viewport_width=960
+window/size/viewport_height=540
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/handheld/orientation=0
 
 [rendering]
 
@@ -38,3 +38,8 @@ window/handheld/orientation=1
 textures/vram_compression/import_etc2_astc=true
 
 renderer/rendering_method="mobile"
+
+[input_devices]
+
+; Чтобы на Mac мышь работала как касание (проверка джойстика без телефона)
+pointing/emulate_touch_from_mouse=true
