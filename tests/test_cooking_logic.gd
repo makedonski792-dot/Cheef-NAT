@@ -69,6 +69,18 @@ func _init() -> void:
 	run_steps(rata, ["oil", "pepper", "onion", "thyme", "garlic", "tomato_sliced", "eggplant_sliced", "zucchini_sliced"])
 	check(rata.is_finished() and rata.grade(10.0)["reward"] == 75, "байялди готов: 50 + 25 = 75")
 
+	print("Подсказки сборки")
+	var hint_asm := AssemblyStation.new()
+	hint_asm.logic = CookingLogic.new(recipe_by_id(recipes, "ratatouille"))
+	var egg := FoodItem.new("eggplant", RecipeLoader.load_ingredients()["eggplant"])
+	var reason := hint_asm.reject_reason(egg)
+	check(reason == "нужно: Баклажан (готово) или Баклажан (нарезка)", "сырой баклажан: " + reason)
+	egg.state = "chopped"
+	reason = hint_asm.reject_reason(egg)
+	check(reason == "сначала добавь: горячее оливковое масло, обжаренный лук, обжаренный перец", "цепочка: " + reason)
+	run_steps(hint_asm.logic, ["oil", "onion", "pepper"])
+	check(hint_asm.reject_reason(egg) == "", "после масла, лука и перца нарезанный баклажан принимается")
+
 	print("Крем-брюле")
 	var cb := CookingLogic.new(recipe_by_id(recipes, "creme_brulee"))
 	check(not cb.can_do("sugar"), "сахар нельзя до желтков")

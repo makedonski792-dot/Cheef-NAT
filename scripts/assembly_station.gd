@@ -33,9 +33,9 @@ func reject_reason(item: FoodItem) -> String:
 			continue
 		if step["id"] in logic.done:
 			return "%s уже добавлено" % item.name
-		for dep in step.get("requires", []):
-			if not (dep in logic.done):
-				return "сначала добавь: %s" % _step_text(dep)
+		var missing := _missing_requirements(step["id"])
+		if not missing.is_empty():
+			return "сначала добавь: %s" % ", ".join(missing)
 		for blocker in step.get("blocked_by", []):
 			if blocker in logic.done:
 				return "уже поздно, добавлено: %s" % _step_text(blocker)
@@ -43,9 +43,30 @@ func reject_reason(item: FoodItem) -> String:
 			return "не сочетается с уже добавленным"
 		return ""
 
-	# Продукт нужен, но в другом виде
-	var need: Dictionary = same_ingredient[0]["item"]
-	return "нужно: %s%s" % [item.name, FoodItem.state_suffix(need["state"])]
+	# Продукт нужен, но в другом виде (может быть несколько подходящих видов)
+	var options: Array[String] = []
+	for step in same_ingredient:
+		options.append(item.name + FoodItem.state_suffix(step["item"]["state"]))
+	return "нужно: %s" % " или ".join(options)
+
+
+# Что ещё нужно добавить до этого шага, включая цепочку (масло → лук → баклажан).
+# Возвращает названия шагов по порядку, без повторов.
+func _missing_requirements(step_id: String) -> Array[String]:
+	var result: Array[String] = []
+	for step in logic.recipe["steps"]:
+		if step["id"] != step_id:
+			continue
+		for dep in step.get("requires", []):
+			if dep in logic.done:
+				continue
+			for deeper in _missing_requirements(dep):
+				if not (deeper in result):
+					result.append(deeper)
+			var text := _step_text(dep)
+			if not (text in result):
+				result.append(text)
+	return result
 
 
 func _step_text(step_id: String) -> String:

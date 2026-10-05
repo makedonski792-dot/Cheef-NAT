@@ -338,8 +338,10 @@ func _build_interface() -> void:
 
 	# Подсказка: что произойдёт по кнопке действия
 	_hint_label = Label.new()
-	_hint_label.position = Vector2(240, 80)
-	_hint_label.add_theme_font_size_override("font_size", 22)
+	_hint_label.position = Vector2(230, 78)
+	_hint_label.size = Vector2(560, 50)
+	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint_label.add_theme_font_size_override("font_size", 19)
 	_hint_label.add_theme_color_override("font_color", Color("8a3b00"))
 	layer.add_child(_hint_label)
 
