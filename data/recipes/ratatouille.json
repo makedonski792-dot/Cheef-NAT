@@ -1,0 +1,35 @@
+{
+	"id": "ratatouille",
+	"name": "Рататуй",
+	"description": "Гость хочет овощное блюдо из Прованса. Можно потушить овощи по-деревенски или выложить их красивой спиралью.",
+	"base_reward": 50,
+	"ingredients": ["eggplant", "zucchini", "tomato", "bell_pepper", "onion", "garlic", "olive_oil", "thyme"],
+	"steps": [
+		{"id": "slice_eggplant", "text": "Нарезать баклажан", "requires": []},
+		{"id": "slice_zucchini", "text": "Нарезать кабачок", "requires": []},
+		{"id": "slice_tomato", "text": "Нарезать помидоры", "requires": []},
+		{"id": "slice_pepper", "text": "Нарезать болгарский перец", "requires": []},
+		{"id": "slice_onion", "text": "Нарезать лук и чеснок", "requires": []},
+		{"id": "heat_oil", "text": "Разогреть оливковое масло", "requires": []},
+		{"id": "saute_base", "text": "Обжарить лук, чеснок и перец", "requires": ["heat_oil", "slice_onion", "slice_pepper"]},
+		{"id": "add_veg", "text": "Добавить баклажан, кабачок и помидоры", "requires": ["saute_base", "slice_eggplant", "slice_zucchini", "slice_tomato"]},
+		{"id": "stew", "text": "Тушить овощи под крышкой", "requires": ["add_veg"]},
+		{"id": "layer_veg", "text": "Выложить овощи спиралью поверх соуса", "requires": ["saute_base", "slice_eggplant", "slice_zucchini", "slice_tomato"]},
+		{"id": "bake", "text": "Запечь в духовке", "requires": ["layer_veg"]},
+		{"id": "add_thyme", "text": "Посыпать тимьяном", "requires": ["saute_base"]}
+	],
+	"variants": [
+		{
+			"id": "stewed",
+			"name": "Тушёный (деревенский)",
+			"needs": ["slice_eggplant", "slice_zucchini", "slice_tomato", "slice_pepper", "slice_onion", "heat_oil", "saute_base", "add_veg", "stew", "add_thyme"],
+			"bonus": 0
+		},
+		{
+			"id": "byaldi",
+			"name": "Конфи байялди (спиралью)",
+			"needs": ["slice_eggplant", "slice_zucchini", "slice_tomato", "slice_pepper", "slice_onion", "heat_oil", "saute_base", "layer_veg", "bake", "add_thyme"],
+			"bonus": 25
+		}
+	]
+}

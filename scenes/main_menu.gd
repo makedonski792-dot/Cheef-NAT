@@ -53,4 +53,11 @@ func _ready() -> void:
 
 # Вызывается при нажатии на кнопку «Готовить»
 func _on_cook_pressed() -> void:
-	_info_label.text = "Скоро: здесь будет выбор рецепта"
+	# Временная проверка шага 2: показываем, какие рецепты загрузились
+	var recipes := RecipeLoader.load_recipes()
+	var lines: Array[String] = []
+	for recipe in recipes:
+		lines.append("%s: шагов %d, вариантов %d, награда %d" % [
+			recipe["name"], recipe["steps"].size(), recipe["variants"].size(), recipe["base_reward"]
+		])
+	_info_label.text = "Загружено рецептов: %d\n%s" % [recipes.size(), "\n".join(lines)]

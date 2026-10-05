@@ -1,0 +1,32 @@
+{
+	"id": "creme_brulee",
+	"name": "Крем-брюле",
+	"description": "Десерт для гостя: нежный ванильный крем и хрустящая карамельная корочка.",
+	"base_reward": 45,
+	"ingredients": ["cream", "egg_yolk", "sugar", "vanilla", "coffee"],
+	"steps": [
+		{"id": "heat_cream", "text": "Нагреть сливки с ванилью", "requires": []},
+		{"id": "infuse_coffee", "text": "Настоять сливки с кофейными зёрнами", "requires": ["heat_cream"], "blocked_by": ["temper"]},
+		{"id": "whisk_yolks", "text": "Взбить желтки с сахаром", "requires": []},
+		{"id": "temper", "text": "Влить горячие сливки в желтки тонкой струйкой", "requires": ["heat_cream", "whisk_yolks"]},
+		{"id": "strain", "text": "Процедить крем", "requires": ["temper"]},
+		{"id": "bake_bath", "text": "Запечь на водяной бане", "requires": ["strain"]},
+		{"id": "chill", "text": "Охладить в холодильнике", "requires": ["bake_bath"]},
+		{"id": "sugar_top", "text": "Посыпать сахаром сверху", "requires": ["chill"]},
+		{"id": "torch", "text": "Карамелизировать корочку горелкой", "requires": ["sugar_top"]}
+	],
+	"variants": [
+		{
+			"id": "vanilla",
+			"name": "Классический ванильный",
+			"needs": ["heat_cream", "whisk_yolks", "temper", "strain", "bake_bath", "chill", "sugar_top", "torch"],
+			"bonus": 0
+		},
+		{
+			"id": "coffee",
+			"name": "Кофейный",
+			"needs": ["heat_cream", "infuse_coffee", "whisk_yolks", "temper", "strain", "bake_bath", "chill", "sugar_top", "torch"],
+			"bonus": 10
+		}
+	]
+}
