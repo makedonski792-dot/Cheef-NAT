@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Иконка игры: белый поварской колпак на бордовом фоне -->
+  <rect width="128" height="128" rx="24" fill="#7a1f2b"/>
+  <circle cx="44" cy="52" r="20" fill="#ffffff"/>
+  <circle cx="64" cy="42" r="24" fill="#ffffff"/>
+  <circle cx="84" cy="52" r="20" fill="#ffffff"/>
+  <rect x="38" y="60" width="52" height="38" rx="4" fill="#ffffff"/>
+  <rect x="38" y="88" width="52" height="10" fill="#e6dccb"/>
+</svg>

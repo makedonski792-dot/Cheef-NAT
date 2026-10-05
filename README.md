@@ -15,3 +15,7 @@
 ```
 /Users/mac/Downloads/Godot.app/Contents/MacOS/Godot --headless --path . --script tests/test_cooking_logic.gd
 ```
+
+## Сборка APK
+При каждом обновлении ветки `main` GitHub сам собирает APK (файл `.github/workflows/android.yml`)
+и кладёт его на страницу Releases как «latest». Скачай `french-chef.apk` на телефон и установи.

@@ -1,0 +1,66 @@
+# Автоматическая сборка APK для Android при каждом обновлении кода на GitHub.
+# Готовый файл появляется на странице Releases (справа на главной странице репозитория).
+name: Сборка Android APK
+
+on:
+  push:
+    branches: [main]
+  # Позволяет запустить сборку вручную кнопкой «Run workflow» на вкладке Actions
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  build:
+    name: Собрать APK
+    runs-on: ubuntu-latest
+    # Готовый образ с Godot, шаблонами экспорта и Android SDK
+    container:
+      image: barichello/godot-ci:4.7.2
+    steps:
+      - name: Скачать код
+        uses: actions/checkout@v4
+
+      - name: Подготовить Godot
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates/
+          mkdir -v -p ~/.config/
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mv /root/.config/godot ~/.config/godot
+
+      - name: Собрать APK
+        run: |
+          mkdir -v -p build
+          godot --headless --verbose --import || true
+          godot --headless --verbose --export-debug "Android Debug" build/french-chef.apk
+
+      - name: Сохранить APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: french-chef-apk
+          path: build/french-chef.apk
+
+  release:
+    name: Опубликовать на странице Releases
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Скачать APK из сборки
+        uses: actions/download-artifact@v4
+        with:
+          name: french-chef-apk
+
+      - name: Обновить релиз «latest»
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Удаляем прошлый релиз, чтобы на странице всегда лежала свежая версия
+          gh release delete latest --cleanup-tag --yes --repo "$GITHUB_REPOSITORY" || true
+          gh release create latest french-chef.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Французский шеф (последняя сборка)" \
+            --notes "Автоматическая сборка из коммита ${GITHUB_SHA::7}. Скачай french-chef.apk на телефон и установи."

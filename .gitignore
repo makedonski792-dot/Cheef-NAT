@@ -2,8 +2,8 @@
 .godot/
 *.translation
 
-# Файлы экспорта и ключи подписи Android (никогда не коммитим!)
-export_presets.cfg
+# Ключи подписи Android (никогда не коммитим!)
+# export_presets.cfg теперь хранится в git: в нём нет секретов (подпись debug-ключом)
 *.keystore
 *.jks
 build/
