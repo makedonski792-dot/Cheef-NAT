@@ -4,7 +4,7 @@
 	"description": "Классический французский луковый суп. Лук нужно нарезать и обжарить, багет подсушить, сыр натереть.",
 	"base_reward": 40,
 	"par_time": 120,
-	"time_limit": 200,
+	"time_limit": 320,
 	"ingredients": ["onion", "butter", "beef_broth", "white_wine", "baguette", "gruyere"],
 	"steps": [
 		{"id": "onion", "text": "Обжаренный лук", "item": {"id": "onion", "state": "cooked"}, "requires": []},

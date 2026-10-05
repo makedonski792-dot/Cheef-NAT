@@ -83,13 +83,22 @@ func _process(delta: float) -> void:
 		_hint_label.text = "%s: %s" % [verb, _focus.target_name(chef)]
 	else:
 		_action_button.label_text = ""
-		_hint_label.text = ""
+		_hint_label.text = _rejection_hint()
 
 
 # Пробел или Enter на клавиатуре — то же, что кнопка действия
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept") and not ended:
 		do_action()
+
+
+# Если повар стоит у «Сборки» с предметом, который сейчас нельзя добавить,
+# объясняем почему (иначе игроку кажется, что ничего не работает)
+func _rejection_hint() -> String:
+	if chef.held == null or assembly.distance_to(chef.position) > REACH:
+		return ""
+	var reason := assembly.reject_reason(chef.held)
+	return "Сборка: %s" % reason if reason != "" else ""
 
 
 # Выполнить действие с ближайшим подходящим местом

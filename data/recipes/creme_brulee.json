@@ -4,7 +4,7 @@
 	"description": "Нежный ванильный крем. Если настоять сливки с кофе до того, как добавишь желтки, получится кофейный вариант.",
 	"base_reward": 45,
 	"par_time": 90,
-	"time_limit": 160,
+	"time_limit": 280,
 	"ingredients": ["cream", "egg_yolk", "sugar", "vanilla", "coffee"],
 	"steps": [
 		{"id": "cream", "text": "Горячие сливки", "item": {"id": "cream", "state": "cooked"}, "requires": []},

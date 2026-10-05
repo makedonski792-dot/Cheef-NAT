@@ -20,6 +20,41 @@ func matching_step(item: FoodItem) -> String:
 	return ""
 
 
+# Почему предмет сейчас нельзя добавить (подсказка игроку). Пусто, если можно.
+func reject_reason(item: FoodItem) -> String:
+	if logic == null or item.is_dish:
+		return ""
+	var same_ingredient: Array = logic.recipe["steps"].filter(func(s): return s["item"]["id"] == item.id)
+	if same_ingredient.is_empty():
+		return "%s не нужен для этого блюда" % item.name
+
+	for step in same_ingredient:
+		if step["item"]["state"] != item.state:
+			continue
+		if step["id"] in logic.done:
+			return "%s уже добавлено" % item.name
+		for dep in step.get("requires", []):
+			if not (dep in logic.done):
+				return "сначала добавь: %s" % _step_text(dep)
+		for blocker in step.get("blocked_by", []):
+			if blocker in logic.done:
+				return "уже поздно, добавлено: %s" % _step_text(blocker)
+		if not logic.can_do_safely(step["id"]):
+			return "не сочетается с уже добавленным"
+		return ""
+
+	# Продукт нужен, но в другом виде
+	var need: Dictionary = same_ingredient[0]["item"]
+	return "нужно: %s%s" % [item.name, FoodItem.state_suffix(need["state"])]
+
+
+func _step_text(step_id: String) -> String:
+	for step in logic.recipe["steps"]:
+		if step["id"] == step_id:
+			return step["text"].to_lower()
+	return step_id
+
+
 func verb(chef: Chef) -> String:
 	if logic == null:
 		return ""

@@ -4,7 +4,7 @@
 	"description": "Овощное блюдо из Прованса. Овощи можно потушить по-деревенски или выложить сырыми ломтиками (байялди).",
 	"base_reward": 50,
 	"par_time": 180,
-	"time_limit": 280,
+	"time_limit": 400,
 	"ingredients": ["eggplant", "zucchini", "tomato", "bell_pepper", "onion", "garlic", "olive_oil", "thyme"],
 	"steps": [
 		{"id": "oil", "text": "Горячее оливковое масло", "item": {"id": "olive_oil", "state": "cooked"}, "requires": []},

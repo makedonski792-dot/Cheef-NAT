@@ -141,6 +141,33 @@ func _init() -> void:
 	check(kitchen.ended and kitchen.last_result.is_empty(), "по таймеру заказ провален, награды нет")
 	check(game_state.coins == 40, "монеты не изменились")
 
+	print("Вино (необязательный продукт)")
+	paused = false
+	kitchen.queue_free()
+	await process_frame
+	await start_kitchen(game_state)
+	var assembly: AssemblyStation = find(AssemblyStation)
+	await take_from_crate("white_wine")
+	await cook()
+	await go(Vector2(480, 405))
+	check(kitchen.find_station() != assembly, "вино до лука не принимается")
+	check(assembly.reject_reason(chef.held).begins_with("сначала добавь"), "причина: " + assembly.reject_reason(chef.held))
+	await go(Vector2(480, 405))
+	var wine := chef.drop()
+	await take_from_crate("onion")
+	await chop()
+	await cook()
+	await add_to_dish()
+	chef.hold(wine)
+	await go(Vector2(480, 405))
+	check(kitchen.find_station() == assembly, "вино после лука принимается")
+	kitchen.do_action()
+	check(kitchen.logic.done.has("wine"), "вино добавлено в блюдо")
+	await take_from_crate("beef_broth")
+	await cook()
+	await add_to_dish()
+	check(kitchen.logic.done.has("broth"), "бульон принят и после вина")
+
 	paused = false
 	DirAccess.remove_absolute("user://test_save.json")
 	print("")
