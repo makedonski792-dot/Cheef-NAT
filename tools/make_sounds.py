@@ -235,48 +235,42 @@ def clink(base):
 
 
 def make_ambient():
-    """Гул ресторана: приглушённые голоса, звон посуды, далёкий шум. Петля 10 секунд."""
+    """Гул ресторана: приглушённый шум зала без тонов, звон посуды. Петля 10 секунд.
+
+    Голоса сделаны шумом, а не звуками с высотой: так они не превращаются в «мяуканье».
+    """
     d = 10.0
     xf = 1.0
     n = n_samples(d + xf)
-    track = [0.0] * n
 
-    # Голоса: несколько «говорящих» с плавным ритмом слогов
-    for _ in range(6):
-        f0 = rng.uniform(95, 230)
-        formant = rng.uniform(450, 1500)
-        weights = [math.exp(-((h * f0 - formant) / 450.0) ** 2) for h in range(1, 9)]
-        # Огибающая: то говорит, то пауза
+    def band(x, low_a, high_a):
+        """Полоса частот: оставляем середину (как далёкая речь)."""
+        return [a - b for a, b in zip(lowpass(x, low_a), lowpass(x, high_a))]
+
+    track = [0.0] * n
+    # Несколько «групп людей»: каждая это шум своей полосы, громкость которого
+    # неровно плавает (слоги и паузы, но без какой-либо высоты тона)
+    for low_a, high_a, weight in ((0.20, 0.03, 1.0), (0.14, 0.02, 1.0), (0.28, 0.05, 0.7), (0.10, 0.015, 0.9)):
+        voice = band(noise(d + xf), low_a, high_a)
         steps = []
         while len(steps) < n:
-            level = rng.choice([0.0, 0.25, 0.7, 1.0])
-            steps.extend([level] * n_samples(rng.uniform(0.12, 0.45)))
-        env = lowpass(steps[:n], 0.0009)
-        drift = rng.uniform(0.3, 0.9)
-        for i in range(n):
-            if env[i] < 0.01:
-                continue
-            t = i / SR
-            f = f0 * (1.0 + 0.04 * math.sin(2 * math.pi * drift * t))
-            v = 0.0
-            for h, w in enumerate(weights, start=1):
-                v += w * math.sin(2 * math.pi * f * h * t)
-            track[i] += v * env[i] * 0.05
+            steps.extend([rng.choice([0.2, 0.5, 0.8, 1.0, 1.0])] * n_samples(rng.uniform(0.15, 0.5)))
+        env = lowpass(steps[:n], 0.0012)
+        track = add(track, [v * e * weight for v, e in zip(voice, env)])
 
-    # Дыхание зала: приглушённый шум и низкий гул
-    room = lowpass(noise(d + xf), 0.08)
-    rumble = lowpass(noise(d + xf), 0.01)
-    track = add(track, add(scale(room, 0.22), scale(rumble, 1.2)))
+    # Общий низкий гул зала
+    rumble = lowpass(noise(d + xf), 0.012)
+    track = add(scale(track, 1.0), scale(rumble, 0.9))
 
     # Звон бокалов и вилок в случайные моменты
     t = rng.uniform(0.3, 1.0)
     while t < d + xf - 0.5:
         base = rng.uniform(2300, 4300)
-        place(track, clink(base), t)
+        place(track, scale(clink(base), 1.6), t)
         if rng.random() < 0.35:   # иногда несколько звяков подряд
             for k in range(1, rng.randint(2, 3)):
-                place(track, scale(clink(base * rng.uniform(0.9, 1.25)), 0.7), t + k * rng.uniform(0.07, 0.14))
-        t += rng.uniform(0.9, 2.8)
+                place(track, scale(clink(base * rng.uniform(0.9, 1.25)), 1.1), t + k * rng.uniform(0.07, 0.14))
+        t += rng.uniform(1.0, 3.0)
 
     save("ambient", make_loop(track, d, xf), 0.75)
 
