@@ -39,7 +39,7 @@ var _sound_button: Button
 func _ready() -> void:
 	shift = GameState.current_shift
 	if shift.is_empty():
-		shift = GameState.pick_shift()
+		shift = GameState.make_shift()
 	menu = RecipeLoader.recipes_for_shift(shift)
 	_ingredients = RecipeLoader.load_ingredients()
 	orders = OrderBoard.new(shift, menu)
@@ -260,11 +260,12 @@ func _on_served(dish: FoodItem) -> void:
 		return
 	# Оценка: звёзды зависят от того, как быстро блюдо подано после прихода заказа
 	var result := dish.dish_logic.grade(order.elapsed)
-	GameState.add_coins(result["reward"])
-	earned += result["reward"]
+	var reward := int(round(result["reward"] * float(shift.get("reward_scale", 1.0))))
+	GameState.add_coins(reward)
+	earned += reward
 	served += 1
 	orders.complete(order)
-	_float_text("+%d монет" % result["reward"], Vector2(740, 150), Color("2e7d32"))
+	_float_text("+%d монет" % reward, Vector2(740, 150), Color("2e7d32"))
 
 
 # Билеты в ряд: самый старый заказ слева
@@ -437,8 +438,8 @@ func _show_overlay(day: int) -> void:
 	var text := Label.new()
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	text.add_theme_font_size_override("font_size", 28)
-	text.text = "День %d закончен!\n%s\nПодано блюд: %d\nПотеряно заказов: %d\nЗаработано: +%d монет" % [
-		day, shift["name"], served, failed, earned
+	text.text = "День %d закончен!\n%s · %s\nПодано блюд: %d\nПотеряно заказов: %d\nЗаработано: +%d монет" % [
+		day, shift["name"], Difficulty.level_name(shift.get("difficulty", "normal")), served, failed, earned
 	]
 	box.add_child(text)
 

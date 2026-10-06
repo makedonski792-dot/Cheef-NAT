@@ -3,12 +3,16 @@ extends Control
 # Смены идут по кругу, по одной в день, выбирать рецепт не нужно:
 # гости сами закажут любое блюдо из меню.
 
-var _shift: Dictionary
+var _shift: Dictionary          # смена с настройками выбранной сложности
+var _base_shift: Dictionary     # смена дня без учёта сложности
+var _info_label: Label
+var _level_buttons := {}
 
 
 func _ready() -> void:
-	_shift = GameState.pick_shift()
-	var menu := RecipeLoader.recipes_for_shift(_shift)
+	_base_shift = GameState.pick_shift()
+	_shift = GameState.make_shift()
+	var menu := RecipeLoader.recipes_for_shift(_base_shift)
 
 	var background := ColorRect.new()
 	background.color = Color("f5ecd9")
@@ -19,13 +23,11 @@ func _ready() -> void:
 	column.set_anchors_preset(Control.PRESET_CENTER)
 	column.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	column.grow_vertical = Control.GROW_DIRECTION_BOTH
-	column.add_theme_constant_override("separation", 12)
+	column.add_theme_constant_override("separation", 8)
 	add_child(column)
 
-	column.add_child(_label("День %d" % GameState.day, 40, Color("3b2a1a")))
-	column.add_child(_label(_shift.get("name", ""), 30, Color("8a5a00")))
-	column.add_child(_label(_shift.get("description", ""), 18, Color("5b4a3a")))
-	column.add_child(_label("Меню на сегодня:", 22, Color("3b2a1a")))
+	column.add_child(_label("День %d: %s" % [GameState.day, _base_shift.get("name", "")], 34, Color("3b2a1a")))
+	column.add_child(_label(_base_shift.get("description", ""), 17, Color("5b4a3a")))
 
 	# Блюда меню с картинками
 	var dishes := HBoxContainer.new()
@@ -34,44 +36,89 @@ func _ready() -> void:
 	column.add_child(dishes)
 	for recipe in menu:
 		var dish := VBoxContainer.new()
-		dish.add_theme_constant_override("separation", 2)
+		dish.add_theme_constant_override("separation", 0)
 		var icon := TextureRect.new()
 		icon.texture = Icons.food(recipe.get("dish_icon", ""))
-		icon.custom_minimum_size = Vector2(72, 72)
+		icon.custom_minimum_size = Vector2(60, 60)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		dish.add_child(icon)
-		dish.add_child(_label(recipe["name"], 20, Color("3b2a1a")))
-		dish.add_child(_label("от %d монет" % recipe["base_reward"], 15, Color("5b4a3a")))
+		dish.add_child(_label(recipe["name"], 18, Color("3b2a1a")))
+		dish.add_child(_label("от %d монет" % recipe["base_reward"], 14, Color("5b4a3a")))
 		dishes.add_child(dish)
 
-	var minutes := int(_shift.get("duration", 420)) / 60
-	column.add_child(_label("Смена длится %d минут. Гости приходят по очереди, у каждого свой таймер." % minutes, 16, Color("5b4a3a")))
+	# Выбор уровня сложности
+	column.add_child(_label("Сложность:", 20, Color("3b2a1a")))
+	var levels := HBoxContainer.new()
+	levels.alignment = BoxContainer.ALIGNMENT_CENTER
+	levels.add_theme_constant_override("separation", 12)
+	column.add_child(levels)
+	var group := ButtonGroup.new()
+	for level_id in Difficulty.ORDER:
+		var button := Button.new()
+		button.text = Difficulty.level_name(level_id)
+		button.toggle_mode = true
+		button.button_group = group
+		button.button_pressed = (level_id == GameState.difficulty)
+		button.custom_minimum_size = Vector2(150, 46)
+		button.add_theme_font_size_override("font_size", 20)
+		# Выбранный уровень подсвечен оранжевым
+		var selected := StyleBoxFlat.new()
+		selected.bg_color = Color("e08a1e")
+		selected.set_corner_radius_all(4)
+		for style_name in ["pressed", "hover_pressed"]:
+			button.add_theme_stylebox_override(style_name, selected)
+		button.add_theme_color_override("font_pressed_color", Color.WHITE)
+		button.add_theme_color_override("font_hover_pressed_color", Color.WHITE)
+		button.pressed.connect(_on_level_pressed.bind(level_id))
+		levels.add_child(button)
+		_level_buttons[level_id] = button
+	_info_label = _label("", 15, Color("5b4a3a"))
+	column.add_child(_info_label)
+	_update_info()
 
 	var start := Button.new()
 	start.text = "Начать смену"
-	start.custom_minimum_size = Vector2(300, 64)
+	start.custom_minimum_size = Vector2(320, 60)
 	start.add_theme_font_size_override("font_size", 28)
 	start.pressed.connect(_on_start_pressed)
 	column.add_child(start)
 
+	# Внизу в ряд: «Как играть» и «Назад»
+	var bottom := HBoxContainer.new()
+	bottom.alignment = BoxContainer.ALIGNMENT_CENTER
+	bottom.add_theme_constant_override("separation", 12)
+	column.add_child(bottom)
+
 	var help := Button.new()
 	help.text = "Как играть"
-	help.custom_minimum_size = Vector2(300, 48)
-	help.add_theme_font_size_override("font_size", 20)
+	help.custom_minimum_size = Vector2(154, 44)
+	help.add_theme_font_size_override("font_size", 18)
 	help.pressed.connect(_show_tutorial)
-	column.add_child(help)
+	bottom.add_child(help)
 
 	var back := Button.new()
 	back.text = "Назад в меню"
-	back.custom_minimum_size = Vector2(300, 48)
-	back.add_theme_font_size_override("font_size", 20)
+	back.custom_minimum_size = Vector2(154, 44)
+	back.add_theme_font_size_override("font_size", 18)
 	back.pressed.connect(_on_back_pressed)
-	column.add_child(back)
+	bottom.add_child(back)
 
 	# Первый раз показываем обучение сразу
 	if not GameState.tutorial_seen:
 		_show_tutorial()
+
+
+# Игрок выбрал уровень сложности: запоминаем и обновляем описание
+func _on_level_pressed(level_id: String) -> void:
+	GameState.difficulty = level_id
+	GameState.save_game()
+	_shift = GameState.make_shift()
+	_update_info()
+
+
+func _update_info() -> void:
+	_info_label.text = Difficulty.describe(_shift)
 
 
 # Короткая инструкция «Как играть» поверх экрана

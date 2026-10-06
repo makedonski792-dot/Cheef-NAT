@@ -11,6 +11,9 @@ var coins: int = 0
 # Включён ли звук (запоминается в сохранении)
 var sound_enabled: bool = true
 
+# Выбранный уровень сложности: "easy", "normal" или "hard" (запоминается)
+var difficulty: String = Difficulty.DEFAULT_ID
+
 # Видел ли игрок короткое обучение (показываем один раз)
 var tutorial_seen: bool = false
 
@@ -31,7 +34,15 @@ func add_coins(amount: int) -> void:
 	save_game()
 
 
-# Смена на сегодня: смены идут по кругу, по одной в день
+# Смена на сегодня с настройками выбранного уровня сложности
+func make_shift() -> Dictionary:
+	var base := pick_shift()
+	if base.is_empty():
+		return base
+	return Difficulty.apply(base, difficulty)
+
+
+# Смена на сегодня без учёта сложности: смены идут по кругу, по одной в день
 func pick_shift() -> Dictionary:
 	var shifts := RecipeLoader.load_shifts()
 	if shifts.is_empty():
@@ -46,7 +57,7 @@ func finish_shift() -> void:
 
 
 func save_game() -> void:
-	SaveGame.write({"coins": coins, "sound": sound_enabled, "day": day, "tutorial": tutorial_seen}, save_path)
+	SaveGame.write({"coins": coins, "sound": sound_enabled, "day": day, "tutorial": tutorial_seen, "difficulty": difficulty}, save_path)
 
 
 # Загрузить сохранение. Если его нет, начинаем с 0 монет.
@@ -57,3 +68,6 @@ func load_game() -> void:
 	sound_enabled = bool(data.get("sound", true))
 	day = maxi(1, int(data.get("day", 1)))
 	tutorial_seen = bool(data.get("tutorial", false))
+	difficulty = String(data.get("difficulty", Difficulty.DEFAULT_ID))
+	if not Difficulty.LEVELS.has(difficulty):
+		difficulty = Difficulty.DEFAULT_ID

@@ -3,7 +3,7 @@
 	"order": 1,
 	"name": "Завтрак в бистро",
 	"description": "Утренняя смена: горячие сэндвичи и нежные крепы.",
-	"duration": 480,
+	"duration": 600,
 	"first_order_delay": 2,
 	"second_order_delay": 35,
 	"order_interval": [
@@ -11,7 +11,7 @@
 		90
 	],
 	"max_orders": 3,
-	"stop_orders_before": 110,
+	"stop_orders_before": 150,
 	"recipes": [
 		"croque_monsieur",
 		"crepes"
