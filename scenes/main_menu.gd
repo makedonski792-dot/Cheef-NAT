@@ -61,6 +61,19 @@ func _ready() -> void:
 	shop_button.pressed.connect(_on_shop_pressed)
 	column.add_child(shop_button)
 
+	# Перенос прогресса: сохранить код или загрузить его после переустановки
+	var transfer_button := Button.new()
+	transfer_button.text = "Перенос прогресса"
+	transfer_button.custom_minimum_size = Vector2(320, 48)
+	transfer_button.add_theme_font_size_override("font_size", 20)
+	transfer_button.pressed.connect(_on_transfer_pressed)
+	column.add_child(transfer_button)
+
+
+# Открываем перенос прогресса
+func _on_transfer_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/transfer.tscn")
+
 
 # Открываем Мастерскую
 func _on_shop_pressed() -> void:

@@ -144,14 +144,38 @@ func finish_shift() -> void:
 	save_game()
 
 
+# Всё, что запоминается между запусками
+func _save_data() -> Dictionary:
+	return {"coins": coins, "sound": sound_enabled, "day": day, "tutorial": tutorial_seen, "difficulty": difficulty,
+			"xp": xp, "owned": owned, "equipped": equipped, "skills": skills}
+
+
 func save_game() -> void:
-	SaveGame.write({"coins": coins, "sound": sound_enabled, "day": day, "tutorial": tutorial_seen, "difficulty": difficulty,
-			"xp": xp, "owned": owned, "equipped": equipped, "skills": skills}, save_path)
+	SaveGame.write(_save_data(), save_path)
 
 
 # Загрузить сохранение. Если его нет, начинаем с 0 монет.
 func load_game() -> void:
-	var data := SaveGame.read(save_path)
+	_apply_data(SaveGame.read(save_path))
+
+
+# Код прогресса: текст, который можно скопировать и вставить после переустановки игры
+func export_code() -> String:
+	return ProgressCode.encode(_save_data())
+
+
+# Загрузить прогресс из кода. Возвращает текст ошибки или "" при успехе.
+func import_code(code: String) -> String:
+	var result := ProgressCode.decode(code)
+	if not result["ok"]:
+		return result["error"]
+	_apply_data(result["data"])
+	save_game()
+	return ""
+
+
+# Применить данные сохранения (из файла или из кода), исправляя некорректные значения
+func _apply_data(data: Dictionary) -> void:
 	# int(...) нужен, потому что JSON хранит числа как дробные
 	coins = maxi(0, int(data.get("coins", 0)))
 	sound_enabled = bool(data.get("sound", true))
