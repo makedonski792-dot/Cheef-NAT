@@ -1,0 +1,230 @@
+{
+	"categories": [
+		{
+			"id": "floor",
+			"name": "Пол",
+			"items": [
+				{
+					"id": "floor_classic",
+					"name": "Классическая плитка",
+					"desc": "Тёплая бежевая шахматка.",
+					"price": 0,
+					"level": 1,
+					"art": "floor_tile"
+				},
+				{
+					"id": "floor_blue",
+					"name": "Голубая плитка",
+					"desc": "Свежая и прохладная.",
+					"price": 120,
+					"level": 2,
+					"art": "floor_blue"
+				},
+				{
+					"id": "floor_terracotta",
+					"name": "Терракота",
+					"desc": "Тёплый провансальский пол.",
+					"price": 220,
+					"level": 3,
+					"art": "floor_terracotta"
+				},
+				{
+					"id": "floor_dark",
+					"name": "Тёмная шахматка",
+					"desc": "Строгий стиль для хорошего ресторана.",
+					"price": 380,
+					"level": 5,
+					"art": "floor_dark"
+				},
+				{
+					"id": "floor_gold",
+					"name": "Золотой мрамор",
+					"desc": "Роскошь для настоящего шефа.",
+					"price": 750,
+					"level": 8,
+					"art": "floor_gold"
+				}
+			]
+		},
+		{
+			"id": "wall",
+			"name": "Стены",
+			"items": [
+				{
+					"id": "wall_brick",
+					"name": "Кирпич",
+					"desc": "Классическая кирпичная кладка.",
+					"price": 0,
+					"level": 1,
+					"art": "wall_tile"
+				},
+				{
+					"id": "wall_dark",
+					"name": "Тёмный кирпич",
+					"desc": "Уютный полумрак.",
+					"price": 100,
+					"level": 2,
+					"art": "wall_dark"
+				},
+				{
+					"id": "wall_white",
+					"name": "Белый кирпич",
+					"desc": "Светлая современная кухня.",
+					"price": 180,
+					"level": 3,
+					"art": "wall_white"
+				},
+				{
+					"id": "wall_green",
+					"name": "Зелёная плитка",
+					"desc": "Цвет свежих трав.",
+					"price": 300,
+					"level": 4,
+					"art": "wall_green"
+				},
+				{
+					"id": "wall_blue",
+					"name": "Синяя плитка",
+					"desc": "Как в морском бистро.",
+					"price": 300,
+					"level": 5,
+					"art": "wall_blue"
+				}
+			]
+		},
+		{
+			"id": "table",
+			"name": "Столы",
+			"items": [
+				{
+					"id": "table_wood",
+					"name": "Дерево",
+					"desc": "Простые деревянные столы.",
+					"price": 0,
+					"level": 1,
+					"art": "counter"
+				},
+				{
+					"id": "table_oak",
+					"name": "Светлый дуб",
+					"desc": "Светлая и тёплая столешница.",
+					"price": 150,
+					"level": 2,
+					"art": "counter_oak"
+				},
+				{
+					"id": "table_marble",
+					"name": "Мрамор",
+					"desc": "Белый мрамор, как в кондитерской.",
+					"price": 350,
+					"level": 4,
+					"art": "counter_marble"
+				},
+				{
+					"id": "table_steel",
+					"name": "Нержавейка",
+					"desc": "Профессиональные кухонные столы.",
+					"price": 500,
+					"level": 6,
+					"art": "counter_steel"
+				},
+				{
+					"id": "table_granite",
+					"name": "Чёрный гранит",
+					"desc": "Самые дорогие столы.",
+					"price": 900,
+					"level": 8,
+					"art": "counter_granite"
+				}
+			]
+		},
+		{
+			"id": "knife",
+			"name": "Ножи",
+			"items": [
+				{
+					"id": "knife_basic",
+					"name": "Обычный нож",
+					"desc": "Режет как умеет.",
+					"price": 0,
+					"level": 1,
+					"chop": 1.0,
+					"blade": "#e6ebf2"
+				},
+				{
+					"id": "knife_chef",
+					"name": "Поварской нож",
+					"desc": "Нарезка на 25% быстрее.",
+					"price": 180,
+					"level": 2,
+					"chop": 1.25,
+					"blade": "#cfd8e3"
+				},
+				{
+					"id": "knife_santoku",
+					"name": "Сантоку",
+					"desc": "Нарезка на 50% быстрее.",
+					"price": 450,
+					"level": 4,
+					"chop": 1.5,
+					"blade": "#9fb3c8"
+				},
+				{
+					"id": "knife_gold",
+					"name": "Золотой нож",
+					"desc": "Нарезка на 80% быстрее.",
+					"price": 1000,
+					"level": 7,
+					"chop": 1.8,
+					"blade": "#f2c14e"
+				}
+			]
+		},
+		{
+			"id": "costume",
+			"name": "Костюмы",
+			"items": [
+				{
+					"id": "costume_classic",
+					"name": "Белый китель",
+					"desc": "Классика поварского искусства.",
+					"price": 0,
+					"level": 1,
+					"art": "chef"
+				},
+				{
+					"id": "costume_red",
+					"name": "Красный китель",
+					"desc": "Яркий и заметный повар.",
+					"price": 150,
+					"level": 2,
+					"art": "chef_red"
+				},
+				{
+					"id": "costume_blue",
+					"name": "Синий китель",
+					"desc": "Строгий и аккуратный.",
+					"price": 300,
+					"level": 3,
+					"art": "chef_blue"
+				},
+				{
+					"id": "costume_black",
+					"name": "Чёрный китель",
+					"desc": "Для настоящего мастера.",
+					"price": 600,
+					"level": 5,
+					"art": "chef_black"
+				},
+				{
+					"id": "costume_gold",
+					"name": "Золотой китель",
+					"desc": "Для лучшего шефа Франции.",
+					"price": 1500,
+					"level": 8,
+					"art": "chef_gold"
+				}
+			]
+		}
+	]
+}

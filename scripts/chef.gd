@@ -4,7 +4,8 @@ extends CharacterBody2D
 # или экранным джойстиком (на телефоне). Стены его не пускают.
 # Анимация: переваливается при ходьбе и «рубит» у доски (working).
 
-const SPEED := 330.0
+# Базовая скорость; навык «Ноги» ускоряет её (см. Progress)
+const BASE_SPEED := 330.0
 const RADIUS := 18.0
 const WALK_BOB_SPEED := 14.0   # как быстро качается при ходьбе
 const WORK_BOB_SPEED := 20.0   # как быстро «рубит» у доски
@@ -13,6 +14,9 @@ const WORK_BOB_SPEED := 20.0   # как быстро «рубит» у доск�
 var joystick: ScreenJoystick
 # Куда смотрит повар (понадобится, чтобы брать предметы перед собой)
 var facing := Vector2.DOWN
+
+# Какой рисунок костюма надет (из магазина); кухня задаёт при старте
+var costume_art := "chef"
 
 # Что повар держит в руках (null — руки пусты)
 var held: FoodItem = null
@@ -61,7 +65,7 @@ func _physics_process(delta: float) -> void:
 	if joystick != null and joystick.value != Vector2.ZERO:
 		direction = joystick.value
 
-	velocity = direction * SPEED
+	velocity = direction * BASE_SPEED * Progress.run_multiplier()
 	move_and_slide()
 
 	_moving = direction.length() > 0.1
@@ -97,7 +101,9 @@ func _draw() -> void:
 		wobble = sin(_phase) * 0.08
 		squash = 1.0 + 0.05 * sin(_phase * 2.0)
 
-	var texture := Icons.kitchen("chef")
+	var texture := Icons.kitchen(costume_art)
+	if texture == null:
+		texture = Icons.kitchen("chef")
 	if texture != null:
 		draw_set_transform(lunge, facing.angle() + wobble, Vector2(squash, 2.0 - squash))
 		draw_texture_rect(texture, Rect2(-30, -30, 60, 60), false)

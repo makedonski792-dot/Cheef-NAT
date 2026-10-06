@@ -48,7 +48,7 @@ func _init() -> void:
 	var screen := joystick.get_viewport_rect().size
 
 	print("Джойстик")
-	check(chef.SPEED >= 320.0, "повар бегает быстрее (скорость %d)" % chef.SPEED)
+	check(chef.BASE_SPEED >= 320.0, "повар бегает быстрее (скорость %d)" % chef.BASE_SPEED)
 	joystick._input(touch(0, Vector2(700, 300), true))
 	check(joystick.value == Vector2.ZERO, "касание в правой половине экрана джойстик не включает")
 	joystick._input(touch(0, Vector2(700, 300), false))

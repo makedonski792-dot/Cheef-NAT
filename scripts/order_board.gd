@@ -66,7 +66,7 @@ func update(delta: float) -> void:
 # он выбирается случайно: обычный заказывают чаще остальных.
 func add_order(recipe: Dictionary, variant_id := "") -> Order:
 	_counter += 1
-	var patience := float(recipe.get("time_limit", 300.0)) * float(_shift.get("patience_scale", 1.0))
+	var patience := float(recipe.get("time_limit", 300.0)) * float(_shift.get("patience_scale", 1.0)) * Progress.patience_multiplier()
 	var order := Order.new(_counter, recipe, patience, _pick_variant(recipe, variant_id))
 	orders.append(order)
 	order_added.emit(order)

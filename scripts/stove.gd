@@ -46,11 +46,12 @@ func reject_reason(item: FoodItem) -> String:
 
 
 func step_duration(item: FoodItem) -> float:
+	# Навык «Плита»: готовит быстрее и сгорает позже
 	match item.state:
 		"raw", "chopped":
-			return COOK_SECONDS
+			return COOK_SECONDS / Progress.cook_multiplier()
 		"cooked":
-			return BURN_SECONDS
+			return BURN_SECONDS * Progress.burn_multiplier()
 	return 0.0
 
 
@@ -68,7 +69,7 @@ func bar_color(item: FoodItem) -> Color:
 
 # Скоро сгорит: готовое лежит на плите слишком долго
 func _is_about_to_burn() -> bool:
-	return slot != null and slot.state == "cooked" and BURN_SECONDS - progress < WARNING_SECONDS
+	return slot != null and slot.state == "cooked" and step_duration(slot) - progress < WARNING_SECONDS
 
 
 func _on_work(delta: float) -> void:

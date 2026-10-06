@@ -15,7 +15,7 @@ func _ready() -> void:
 	column.set_anchors_preset(Control.PRESET_CENTER)
 	column.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	column.grow_vertical = Control.GROW_DIRECTION_BOTH
-	column.add_theme_constant_override("separation", 24)
+	column.add_theme_constant_override("separation", 14)
 	add_child(column)
 
 	var title := Label.new()
@@ -39,12 +39,32 @@ func _ready() -> void:
 	coins_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(coins_label)
 
+	var level_label := Label.new()
+	level_label.text = "Повар: уровень %d" % GameState.chef_level()
+	level_label.add_theme_font_size_override("font_size", 20)
+	level_label.add_theme_color_override("font_color", Color("1b5e20"))
+	level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(level_label)
+
 	var cook_button := Button.new()
 	cook_button.text = "Начать смену"
 	cook_button.custom_minimum_size = Vector2(320, 80)
 	cook_button.add_theme_font_size_override("font_size", 32)
 	cook_button.pressed.connect(_on_cook_pressed)
 	column.add_child(cook_button)
+
+	# Мастерская: интерьер, ножи, костюмы и навыки повара
+	var shop_button := Button.new()
+	shop_button.text = "Мастерская"
+	shop_button.custom_minimum_size = Vector2(320, 64)
+	shop_button.add_theme_font_size_override("font_size", 26)
+	shop_button.pressed.connect(_on_shop_pressed)
+	column.add_child(shop_button)
+
+
+# Открываем Мастерскую
+func _on_shop_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/shop.tscn")
 
 
 # Вызывается при нажатии на кнопку: открываем экран начала смены

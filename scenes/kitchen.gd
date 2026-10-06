@@ -21,6 +21,8 @@ var orders: OrderBoard
 var served := 0               # сколько блюд подано
 var failed := 0               # сколько заказов потеряно
 var earned := 0               # сколько монет заработано за смену
+var xp_gained := 0            # сколько опыта получил повар за смену
+var levels_gained := 0        # на сколько уровней вырос повар
 var ended := false
 
 var _tickets := {}            # Order -> OrderTicket
@@ -54,6 +56,7 @@ func _ready() -> void:
 	chef = Chef.new()
 	chef.position = Vector2(480, 360)
 	chef.z_index = 10
+	chef.costume_art = Progress.art("costume")
 	add_child(chef)
 
 	# Станциям с работой нужно знать, где повар (доска режет, только пока он рядом)
@@ -260,9 +263,12 @@ func _on_served(dish: FoodItem) -> void:
 		return
 	# Оценка: звёзды зависят от того, как быстро блюдо подано после прихода заказа
 	var result := dish.dish_logic.grade(order.elapsed)
-	var reward := int(round(result["reward"] * float(shift.get("reward_scale", 1.0))))
+	# Награда: сложность смены и навык «Чаевые»; опыт повара идёт от базовой награды
+	var reward := int(round(result["reward"] * float(shift.get("reward_scale", 1.0)) * Progress.coin_multiplier()))
 	GameState.add_coins(reward)
 	earned += reward
+	xp_gained += result["reward"]
+	levels_gained += GameState.add_xp(result["reward"])
 	served += 1
 	orders.complete(order)
 	_float_text("+%d монет" % reward, Vector2(740, 150), Color("2e7d32"))
@@ -438,9 +444,12 @@ func _show_overlay(day: int) -> void:
 	var text := Label.new()
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	text.add_theme_font_size_override("font_size", 28)
-	text.text = "День %d закончен!\n%s · %s\nПодано блюд: %d\nПотеряно заказов: %d\nЗаработано: +%d монет" % [
-		day, shift["name"], Difficulty.level_name(shift.get("difficulty", "normal")), served, failed, earned
+	text.text = "День %d закончен!\n%s · %s\nПодано блюд: %d\nПотеряно заказов: %d\nЗаработано: +%d монет\nОпыт повара: +%d (уровень %d)" % [
+		day, shift["name"], Difficulty.level_name(shift.get("difficulty", "normal")), served, failed, earned,
+		xp_gained, GameState.chef_level()
 	]
+	if levels_gained > 0:
+		text.text += "\nНовый уровень! Очки навыков: %d. Загляни в Мастерскую." % GameState.skill_points()
 	box.add_child(text)
 
 	var next := Button.new()
@@ -482,14 +491,17 @@ func _update_sound_button() -> void:
 # Пол, стены и столы. Всё, что рисуем как блок, ещё и не пускает повара.
 func _build_floor_and_walls() -> void:
 	# Пол (плитка) и тёмный фон за его пределами
-	add_child(KitchenFloor.new())
+	var kitchen_floor := KitchenFloor.new()
+	kitchen_floor.art_name = Progress.art("floor")
+	add_child(kitchen_floor)
 
 	var wall_color := Color("5b3a1e")
 	var counter_color := Color("b08a5a")
-	_add_block(Rect2(0, 0, 960, 70), counter_color, "counter")   # длинный стол у верхней стены
-	_add_block(Rect2(0, 520, 960, 20), wall_color, "wall_tile")  # нижняя стена
-	_add_block(Rect2(0, 0, 20, 540), wall_color, "wall_tile")    # левая стена
-	_add_block(Rect2(940, 0, 20, 540), wall_color, "wall_tile")  # правая стена
+	var wall_art := Progress.art("wall")
+	_add_block(Rect2(0, 0, 960, 70), counter_color, Progress.art("table"))   # длинный стол у верхней стены
+	_add_block(Rect2(0, 520, 960, 20), wall_color, wall_art)  # нижняя стена
+	_add_block(Rect2(0, 0, 20, 540), wall_color, wall_art)    # левая стена
+	_add_block(Rect2(940, 0, 20, 540), wall_color, wall_art)  # правая стена
 
 
 # Твёрдый блок (стена или стол) с картинкой, которая повторяется плиткой
@@ -518,12 +530,12 @@ func _build_stations() -> void:
 	# Столы
 	var island := Table.new()
 	island.setup(Rect2(400, 240, 160, 70), Color("b08a5a"), "Стол")
-	island.set_art(Icons.kitchen("counter"))
+	island.set_art(Icons.kitchen(Progress.art("table")))
 	_add_station(island)
 
 	var side_table := Table.new()
 	side_table.setup(Rect2(240, 400, 140, 70), Color("b08a5a"), "Стол")
-	side_table.set_art(Icons.kitchen("counter"))
+	side_table.set_art(Icons.kitchen(Progress.art("table")))
 	_add_station(side_table)
 
 	# Рабочие станции: доска слева от острова, плита справа
@@ -604,6 +616,8 @@ func _build_interface() -> void:
 	_shift_label.position = Vector2(700, 124)
 	_shift_label.add_theme_font_size_override("font_size", 18)
 	_shift_label.add_theme_color_override("font_color", Color("3b2a1a"))
+	_shift_label.add_theme_color_override("font_outline_color", Color.WHITE)
+	_shift_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(_shift_label)
 
 	# Подсказка: что произойдёт по кнопке действия
@@ -613,6 +627,8 @@ func _build_interface() -> void:
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.add_theme_font_size_override("font_size", 19)
 	_hint_label.add_theme_color_override("font_color", Color("8a3b00"))
+	_hint_label.add_theme_color_override("font_outline_color", Color.WHITE)
+	_hint_label.add_theme_constant_override("outline_size", 6)
 	layer.add_child(_hint_label)
 
 	# Совет: что делать с предметом в руках

@@ -31,7 +31,8 @@ func reject_reason(item: FoodItem) -> String:
 
 
 func step_duration(item: FoodItem) -> float:
-	return CHOP_SECONDS if item.state == "raw" else 0.0
+	# Нож и навык «Руки» сокращают время нарезки
+	return CHOP_SECONDS / Progress.chop_multiplier() if item.state == "raw" else 0.0
 
 
 func advance(item: FoodItem) -> void:
@@ -68,7 +69,7 @@ func _draw_extra() -> void:
 	draw_set_transform(pivot, -0.95 + swing * 0.95, Vector2.ONE)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(0, -5), Vector2(-36, -2), Vector2(-39, 5), Vector2(0, 5)
-	]), Color("e6ebf2"))
+	]), Progress.knife_blade())
 	draw_polyline(PackedVector2Array([Vector2(0, -5), Vector2(-36, -2), Vector2(-39, 5), Vector2(0, 5)]),
 			Color("7b8794"), 1.5)
 	draw_rect(Rect2(0, -5, 18, 10), Color("5b3a1e"))
