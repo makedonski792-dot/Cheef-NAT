@@ -29,6 +29,12 @@ jobs:
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mv /root/.config/godot ~/.config/godot
 
+      - name: Номер версии (растёт с каждой сборкой, чтобы Android считал APK обновлением)
+        run: |
+          sed -i "s/^version\/code=.*/version\/code=${GITHUB_RUN_NUMBER}/" export_presets.cfg
+          sed -i "s/^version\/name=.*/version\/name=\"0.1.${GITHUB_RUN_NUMBER}\"/" export_presets.cfg
+          grep "^version/" export_presets.cfg
+
       - name: Собрать APK
         run: |
           mkdir -v -p build
