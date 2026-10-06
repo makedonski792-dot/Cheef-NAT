@@ -13,6 +13,7 @@ var info: Dictionary
 var is_dish := false
 # У готового блюда: какой это рецепт и как он собран (для оценки при подаче)
 var dish_recipe_id := ""
+var dish_variant_id := ""
 var dish_logic: CookingLogic
 
 

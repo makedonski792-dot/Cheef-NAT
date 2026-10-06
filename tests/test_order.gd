@@ -110,7 +110,7 @@ func _init() -> void:
 
 	print("Заказы")
 	check(kitchen.orders.orders.is_empty(), "в начале заказов нет")
-	var order: Order = kitchen.orders.add_order(soup)
+	var order: Order = kitchen.orders.add_order(soup, "classic")
 	check(kitchen.orders.orders.size() == 1 and kitchen._tickets.has(order), "заказ появился, есть билет")
 	check(is_equal_approx(order.patience, soup["time_limit"] * float(kitchen.shift.get("patience_scale", 1.0))), "терпение гостя = %d с" % order.patience)
 
@@ -124,7 +124,7 @@ func _init() -> void:
 	await add_to_dish()
 	check(assembly.candidates.size() == 1 and assembly.candidates[0].recipe["id"] == "onion_soup",
 			"обжаренный лук: тарелка поняла, что это луковый суп")
-	check(kitchen._detail_title.text == "Луковый суп" and kitchen._detail_label.text.begins_with("Собираем"), "подсказка: " + kitchen._detail_title.text)
+	check(kitchen._detail_title.text == "Луковый суп" and kitchen._detail_label.text.contains("Собираем"), "подсказка: " + kitchen._detail_title.text)
 
 	await take_from_crate("onion")
 	await chop()
@@ -178,7 +178,7 @@ func _init() -> void:
 	chef.drop()
 
 	print("Гость уходит")
-	var order2: Order = kitchen.orders.add_order(soup)
+	var order2: Order = kitchen.orders.add_order(soup, "classic")
 	kitchen.orders.update(order2.patience + 1.0)
 	check(kitchen.failed == 1, "гость не дождался: потеряно заказов %d" % kitchen.failed)
 	check(kitchen.orders.orders.is_empty(), "заказ убран")
@@ -195,7 +195,7 @@ func _init() -> void:
 	check(not kitchen.orders.is_finished(), "в начале смена не закончена")
 	kitchen.orders.elapsed = kitchen.orders.spawn_cutoff() + 1.0
 	check(kitchen.orders.is_finished(), "новых гостей не будет и заказов нет: смена закончена")
-	kitchen.orders.add_order(soup)
+	kitchen.orders.add_order(soup, "classic")
 	check(not kitchen.orders.is_finished(), "пока есть невыполненный заказ, смена идёт")
 
 	print("Вино (необязательный продукт)")

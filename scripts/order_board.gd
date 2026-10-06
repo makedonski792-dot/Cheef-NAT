@@ -62,22 +62,47 @@ func update(delta: float) -> void:
 		_next_spawn = elapsed + wait
 
 
-# Добавить заказ на блюдо (тесты вызывают это напрямую)
-func add_order(recipe: Dictionary) -> Order:
+# Добавить заказ на блюдо (тесты вызывают это напрямую). Если вариант не указан,
+# он выбирается случайно: обычный заказывают чаще остальных.
+func add_order(recipe: Dictionary, variant_id := "") -> Order:
 	_counter += 1
 	var patience := float(recipe.get("time_limit", 300.0)) * float(_shift.get("patience_scale", 1.0))
-	var order := Order.new(_counter, recipe, patience)
+	var order := Order.new(_counter, recipe, patience, _pick_variant(recipe, variant_id))
 	orders.append(order)
 	order_added.emit(order)
 	return order
 
 
-# Заказ на это блюдо, который дольше всех ждёт (или null, если такого заказа нет)
-func find_for(recipe_id: String) -> Order:
+# Заказ на это блюдо, который дольше всех ждёт (или null, если такого заказа нет).
+# Если указан вариант, ищем заказ именно на него.
+func find_for(recipe_id: String, variant_id := "") -> Order:
 	for order in orders:
-		if order.recipe["id"] == recipe_id:
+		if order.recipe["id"] == recipe_id and (variant_id == "" or order.variant.get("id", "") == variant_id):
 			return order
 	return null
+
+
+func has_order(recipe_id: String, variant_id := "") -> bool:
+	return find_for(recipe_id, variant_id) != null
+
+
+# Выбрать вариант блюда для заказа
+func _pick_variant(recipe: Dictionary, variant_id: String) -> Dictionary:
+	var variants: Array = recipe["variants"]
+	if variant_id != "":
+		for variant in variants:
+			if variant["id"] == variant_id:
+				return variant
+	# Обычный вариант (без бонуса) выпадает чаще, особенный реже
+	var total := 0.0
+	for variant in variants:
+		total += 3.0 if int(variant.get("bonus", 0)) == 0 else 2.0
+	var roll := _rng.randf() * total
+	for variant in variants:
+		roll -= 3.0 if int(variant.get("bonus", 0)) == 0 else 2.0
+		if roll <= 0.0:
+			return variant
+	return variants[0]
 
 
 # Заказ выполнен

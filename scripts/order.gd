@@ -4,14 +4,22 @@ extends RefCounted
 
 var number: int            # порядковый номер заказа в смене
 var recipe: Dictionary
+# Какой именно вариант блюда просит гость («Классический», «С белым вином»…)
+var variant: Dictionary
 var patience: float        # сколько секунд гость ждёт
 var elapsed := 0.0         # сколько уже ждёт
 
 
-func _init(order_number: int, recipe_data: Dictionary, wait_seconds: float) -> void:
+func _init(order_number: int, recipe_data: Dictionary, wait_seconds: float, variant_data: Dictionary = {}) -> void:
 	number = order_number
 	recipe = recipe_data
 	patience = wait_seconds
+	variant = variant_data
+
+
+# Название заказанного варианта
+func variant_name() -> String:
+	return variant.get("name", "")
 
 
 func remaining() -> float:

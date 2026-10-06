@@ -15,7 +15,7 @@
 		{"id": "leek", "text": "Обжаренный лук-порей", "item": {"id": "leek", "state": "cooked"}, "requires": ["bacon"]}
 	],
 	"variants": [
-		{"id": "lorraine", "name": "Классический лорен", "needs": ["bacon", "egg", "cream", "gruyere"], "bonus": 0},
+		{"id": "lorraine", "name": "Классический", "needs": ["bacon", "egg", "cream", "gruyere"], "bonus": 0},
 		{"id": "leek", "name": "С луком-пореем", "needs": ["bacon", "egg", "cream", "gruyere", "leek"], "bonus": 10}
 	]
 }

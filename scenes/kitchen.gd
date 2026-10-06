@@ -151,7 +151,8 @@ func _guide_text() -> String:
 
 	var needs := _needed_states(item.id)
 	if needs.is_empty():
-		return "Совет: %s не нужен в этой смене, выбрось" % item.name
+		var reason := "для текущих заказов" if not orders.orders.is_empty() else "в этой смене"
+		return "Совет: %s не нужен %s, выбрось" % [item.name, reason]
 
 	var chopped: bool = "chopped" in needs
 	var cooked: bool = "cooked" in needs
@@ -179,25 +180,25 @@ func _guide_text() -> String:
 	return "Совет: в таком виде это сейчас не подойдёт"
 
 
-# В каком виде нужен продукт для блюд смены. Сначала смотрим блюда, которые
-# заказали гости; если там продукт не нужен, смотрим всё меню.
+# В каком виде нужен продукт. Если у гостей есть заказы, смотрим только продукты
+# заказанных вариантов блюд; пока заказов нет, смотрим всё меню.
 func _needed_states(ingredient_id: String) -> Array[String]:
-	var ordered: Array = []
-	for order in orders.orders:
-		ordered.append(order.recipe)
-	var result := _states_in(ordered, ingredient_id)
-	if result.is_empty():
-		result = _states_in(menu, ingredient_id)
-	return result
-
-
-func _states_in(recipes: Array, ingredient_id: String) -> Array[String]:
 	var result: Array[String] = []
-	for recipe_data in recipes:
-		for step in recipe_data["steps"]:
-			if step["item"]["id"] == ingredient_id and not (step["item"]["state"] in result):
-				result.append(step["item"]["state"])
+	if orders.orders.is_empty():
+		for recipe_data in menu:
+			for step in recipe_data["steps"]:
+				_add_state(result, step, ingredient_id)
+		return result
+	for order in orders.orders:
+		for step in order.recipe["steps"]:
+			if step["id"] in order.variant.get("needs", []):
+				_add_state(result, step, ingredient_id)
 	return result
+
+
+func _add_state(result: Array[String], step: Dictionary, ingredient_id: String) -> void:
+	if step["item"]["id"] == ingredient_id and not (step["item"]["state"] in result):
+		result.append(step["item"]["state"])
 
 
 # Выполнить действие с ближайшим подходящим местом
@@ -254,7 +255,7 @@ func _on_order_expired(order: Order) -> void:
 
 # Блюдо подано гостю
 func _on_served(dish: FoodItem) -> void:
-	var order := orders.find_for(dish.dish_recipe_id)
+	var order := orders.find_for(dish.dish_recipe_id, dish.dish_variant_id)
 	if order == null or ended:
 		return
 	# Оценка: звёзды зависят от того, как быстро блюдо подано после прихода заказа
@@ -306,30 +307,73 @@ func _update_hud() -> void:
 		ticket.queue_redraw()
 
 
-# Подсказка слева: что собирается на тарелке сейчас или рецепт самого старого заказа
+# Заказ, под который сейчас собирается блюдо на тарелке (или null).
+# Если гости заказали разные варианты, берём тот, с которым ещё сходится содержимое тарелки.
+func _order_for_plate(cooking: CookingLogic) -> Order:
+	var fallback: Order = null
+	for order in orders.orders:
+		if order.recipe["id"] != cooking.recipe["id"]:
+			continue
+		if fallback == null:
+			fallback = order
+		var fits := true
+		for step_id in cooking.done:
+			if not (step_id in order.variant.get("needs", [])):
+				fits = false
+				break
+		if fits:
+			return order
+	return fallback
+
+
+# Подсказка слева: что собирается на тарелке сейчас или заказ самого старого гостя.
+# Если у заказа есть конкретный вариант, показываем продукты именно для него.
 func _refresh_detail() -> void:
 	var cooking := assembly.best_candidate()
 	var recipe: Dictionary
-	var header := "Нужно (* — на выбор):"
+	var order: Order = null
 	if cooking != null:
 		recipe = cooking.recipe
-		header = "Готово! Неси на раздачу" if cooking.is_finished() else "Собираем (* — на выбор):"
+		order = _order_for_plate(cooking)
 	elif not orders.orders.is_empty():
-		recipe = orders.orders[0].recipe
+		order = orders.orders[0]
+		recipe = order.recipe
 	else:
 		_detail_title.text = "Ждём гостей…"
 		_detail_label.text = ""
 		return
 
-	var required := _required_steps(recipe)
+	var header := "Нужно:"
+	if cooking != null:
+		header = "Готово! Неси на раздачу" if assembly.finished_candidate() == cooking else "Собираем:"
+
 	var lines: Array[String] = []
-	for step in recipe["steps"]:
-		var mark := "[x]" if cooking != null and step["id"] in cooking.done else "[  ]"
-		var optional := "" if required.has(step["id"]) else " *"
-		lines.append("%s %s%s %s" % [mark, step["text"], optional, _prep_tag(step)])
+	var intro := ""
+	if order != null:
+		# Только продукты заказанного варианта
+		var needs: Array = order.variant.get("needs", [])
+		intro = "Заказ: %s\n" % order.variant_name()
+		for step in recipe["steps"]:
+			if step["id"] in needs:
+				var mark := "[x]" if cooking != null and step["id"] in cooking.done else "[  ]"
+				lines.append("%s %s %s" % [mark, step["text"], _prep_tag(step)])
+		# Лишнее на тарелке (не из заказанного варианта)
+		if cooking != null:
+			for step in recipe["steps"]:
+				if step["id"] in cooking.done and not (step["id"] in needs):
+					lines.append("[!] %s — лишнее, очисти тарелку" % step["text"])
+	else:
+		# Заказа на это блюдо нет: показываем все шаги, необязательные со звёздочкой
+		var required := _required_steps(recipe)
+		header += " (* — на выбор)"
+		for step in recipe["steps"]:
+			var mark := "[x]" if cooking != null and step["id"] in cooking.done else "[  ]"
+			var optional := "" if required.has(step["id"]) else " *"
+			lines.append("%s %s%s %s" % [mark, step["text"], optional, _prep_tag(step)])
+
 	_detail_title.text = recipe["name"]
-	_detail_label.text = header + "\nД = доска, П = плита\n" + "\n".join(lines)
-	_detail_label.add_theme_font_size_override("font_size", 12 if recipe["steps"].size() <= 8 else 10)
+	_detail_label.text = intro + header + "\nД = доска, П = плита\n" + "\n".join(lines)
+	_detail_label.add_theme_font_size_override("font_size", 12 if lines.size() <= 8 else 10)
 
 
 # Короткая пометка, как приготовить продукт: [Д] резать на доске, [П] жарить на плите
@@ -496,6 +540,7 @@ func _build_stations() -> void:
 	assembly = AssemblyStation.new()
 	assembly.setup(Rect2(400, 430, 160, 70), Color("f3e9d2"), "Сборка")
 	assembly.set_art(Icons.kitchen("assembly"))
+	assembly.orders = orders
 	assembly.setup_menu(menu)
 	_add_station(assembly)
 
@@ -533,7 +578,7 @@ func _build_interface() -> void:
 	# Карточка-подсказка слева: что нужно для блюда
 	var card := ColorRect.new()
 	card.color = Color(1, 1, 1, 0.82)
-	card.position = Vector2(24, 138)
+	card.position = Vector2(24, 148)
 	card.size = Vector2(192, 250)
 	layer.add_child(card)
 
@@ -562,7 +607,7 @@ func _build_interface() -> void:
 
 	# Подсказка: что произойдёт по кнопке действия
 	_hint_label = Label.new()
-	_hint_label.position = Vector2(232, 140)
+	_hint_label.position = Vector2(232, 150)
 	_hint_label.size = Vector2(450, 50)
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.add_theme_font_size_override("font_size", 19)
@@ -571,7 +616,7 @@ func _build_interface() -> void:
 
 	# Совет: что делать с предметом в руках
 	_guide_label = Label.new()
-	_guide_label.position = Vector2(232, 190)
+	_guide_label.position = Vector2(232, 200)
 	_guide_label.size = Vector2(460, 44)
 	_guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_guide_label.add_theme_font_size_override("font_size", 17)

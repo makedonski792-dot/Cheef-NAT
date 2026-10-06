@@ -16,7 +16,7 @@
 		{"id": "egg", "text": "Яичница (для мадам)", "item": {"id": "egg", "state": "cooked"}, "requires": ["bread", "ham"]}
 	],
 	"variants": [
-		{"id": "monsieur", "name": "Крок-месье", "needs": ["butter", "milk", "bread", "ham", "gruyere"], "bonus": 0},
-		{"id": "madame", "name": "Крок-мадам", "needs": ["butter", "milk", "bread", "ham", "gruyere", "egg"], "bonus": 15}
+		{"id": "monsieur", "name": "Обычный", "needs": ["butter", "milk", "bread", "ham", "gruyere"], "bonus": 0},
+		{"id": "madame", "name": "С яйцом (мадам)", "needs": ["butter", "milk", "bread", "ham", "gruyere", "egg"], "bonus": 15}
 	]
 }

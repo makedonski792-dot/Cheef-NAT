@@ -6,6 +6,7 @@ extends Station
 # Когда блюдо собрано, его можно взять и отнести на раздачу.
 
 var menu: Array = []                       # рецепты смены
+var orders: OrderBoard                     # заказы гостей (подключает кухня)
 var candidates: Array[CookingLogic] = []   # блюда, к которым ещё подходит содержимое тарелки
 var delivered: Array[FoodItem] = []        # что уже лежит на тарелке
 
@@ -48,14 +49,23 @@ func accepting(item: FoodItem) -> Array[CookingLogic]:
 	return result
 
 
-# Блюдо, которое уже собрано полностью (или null)
+# Блюдо, которое уже собрано полностью И нужно гостям (или null).
+# Если собрался вариант, который никто не заказывал, тарелка ждёт: можно
+# добавить ещё продукты или очистить её.
 func finished_candidate() -> CookingLogic:
 	if delivered.is_empty():
 		return null
 	for cooking in candidates:
-		if cooking.is_finished():
+		if cooking.is_finished() and _is_wanted(cooking):
 			return cooking
 	return null
+
+
+# Заказан ли у гостей именно этот вариант блюда (если заказов нет, годится любой)
+func _is_wanted(cooking: CookingLogic) -> bool:
+	if orders == null or orders.orders.is_empty():
+		return true
+	return orders.has_order(cooking.recipe["id"], cooking.finished_variant()["id"])
 
 
 # Блюдо, которое сейчас больше всего похоже на содержимое тарелки (или null, если тарелка пуста)
@@ -149,7 +159,10 @@ func _step_text(cooking: CookingLogic, step_id: String) -> String:
 func verb(chef: Chef) -> String:
 	if chef.held != null:
 		return "Добавить" if not accepting(chef.held).is_empty() else ""
-	return "Взять блюдо" if finished_candidate() != null else ""
+	if finished_candidate() != null:
+		return "Взять блюдо"
+	# Тарелку можно очистить, если собралось не то (исправить ошибку)
+	return "Очистить" if not delivered.is_empty() else ""
 
 
 func target_name(chef: Chef) -> String:
@@ -158,7 +171,7 @@ func target_name(chef: Chef) -> String:
 	var finished := finished_candidate()
 	if finished != null:
 		return finished.recipe["name"]
-	return _label
+	return "тарелку (продукты пропадут)" if not delivered.is_empty() else _label
 
 
 func interact(chef: Chef) -> void:
@@ -181,6 +194,10 @@ func interact(chef: Chef) -> void:
 		if finished != null:
 			chef.hold(_make_dish(finished))
 			reset_plate()
+		elif not delivered.is_empty():
+			# Очистка тарелки: всё, что на ней было, пропадает
+			Sound.play("drop")
+			reset_plate()
 	queue_redraw()
 
 
@@ -194,6 +211,7 @@ func _make_dish(cooking: CookingLogic) -> FoodItem:
 	})
 	item.is_dish = true
 	item.dish_recipe_id = cooking.recipe["id"]
+	item.dish_variant_id = variant["id"]
 	item.dish_logic = cooking
 	return item
 

@@ -65,6 +65,20 @@ func _init() -> void:
 	late.update(late.spawn_cutoff() + 5.0)
 	check(late.orders.is_empty(), "после границы новые гости не приходят")
 
+	print("Варианты в заказах")
+	var counts := {}
+	var variant_board := OrderBoard.new(shift, menu)
+	for i in 600:
+		var o: Order = variant_board.add_order(menu[0])
+		counts[o.variant["id"]] = counts.get(o.variant["id"], 0) + 1
+		variant_board.complete(o)
+	check(counts.size() == menu[0]["variants"].size(), "у блюда «%s» гости заказывают все варианты: %s" % [menu[0]["name"], counts])
+	var base_id: String = menu[0]["variants"][0]["id"]
+	var other_id: String = menu[0]["variants"][1]["id"]
+	check(counts[base_id] > counts[other_id], "обычный вариант заказывают чаще особенного (%d против %d)" % [counts[base_id], counts[other_id]])
+	var forced: Order = variant_board.add_order(menu[0], other_id)
+	check(forced.variant["id"] == other_id and forced.variant_name() != "", "вариант можно задать явно")
+
 	print("Дни")
 	game_state.day = 1
 	check(game_state.pick_shift()["id"] == "breakfast", "день 1: завтрак")
