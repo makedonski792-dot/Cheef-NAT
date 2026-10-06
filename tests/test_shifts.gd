@@ -61,6 +61,31 @@ func _init() -> void:
 		check(id in shift["recipes"], "заказ «%s» есть в меню смены" % id)
 	check(board.is_finished(), "в конце времени смена закончена")
 
+	print("Не простаиваем")
+	var idle_board := OrderBoard.new(Difficulty.apply(shift, "easy"), menu)
+	var arrivals: Array[float] = []
+	idle_board.order_added.connect(func(o): arrivals.append(idle_board.elapsed))
+	var idle_t := 0.0
+	while idle_t < 200.0:
+		idle_board.update(0.25)
+		idle_t += 0.25
+		# Игрок мгновенно обслуживает любой заказ
+		if not idle_board.orders.is_empty():
+			idle_board.complete(idle_board.orders[0])
+	var longest_wait := 0.0
+	for i in range(1, arrivals.size()):
+		longest_wait = maxf(longest_wait, arrivals[i] - arrivals[i - 1])
+	check(arrivals.size() >= 20, "на лёгком за 200 с пришло гостей: %d" % arrivals.size())
+	check(longest_wait <= 5.0, "когда заказов нет, следующий гость приходит быстро (самая долгая пауза %.1f с)" % longest_wait)
+	var busy_board := OrderBoard.new(Difficulty.apply(shift, "easy"), menu)
+	var seen_two := false
+	var busy_t := 0.0
+	while busy_t < 60.0:
+		busy_board.update(0.5)
+		busy_t += 0.5
+		seen_two = seen_two or busy_board.orders.size() >= 2
+	check(seen_two, "на лёгком второй гость приходит в первую минуту")
+
 	var late := OrderBoard.new(shift, menu)
 	late.update(late.spawn_cutoff() + 5.0)
 	check(late.orders.is_empty(), "после границы новые гости не приходят")

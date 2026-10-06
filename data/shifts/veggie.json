@@ -5,10 +5,10 @@
 	"description": "Рататуй и салат: вся Прованса на тарелке.",
 	"duration": 600,
 	"first_order_delay": 2,
-	"second_order_delay": 35,
+	"second_order_delay": 18,
 	"order_interval": [
-		65,
-		90
+		35,
+		50
 	],
 	"max_orders": 3,
 	"stop_orders_before": 150,

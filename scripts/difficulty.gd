@@ -10,9 +10,9 @@ const DEFAULT_ID := "easy"
 # duration — длина смены, interval — как редко приходят гости, patience — терпение гостей,
 # reward — множитель награды в монетах
 const LEVELS := {
-	"easy": {"name": "Лёгкий", "duration": 1.5, "interval": 1.25, "patience": 1.3, "max_orders": 2, "reward": 0.8},
+	"easy": {"name": "Лёгкий", "duration": 1.5, "interval": 1.25, "patience": 1.3, "max_orders": 3, "reward": 0.8},
 	"normal": {"name": "Обычный", "duration": 1.0, "interval": 1.0, "patience": 1.0, "max_orders": 3, "reward": 1.0},
-	"hard": {"name": "Сложный", "duration": 0.7, "interval": 0.8, "patience": 0.7, "max_orders": 4, "reward": 1.5},
+	"hard": {"name": "Сложный", "duration": 0.7, "interval": 0.75, "patience": 0.7, "max_orders": 4, "reward": 1.5},
 }
 
 

@@ -7,6 +7,9 @@ signal order_added(order: Order)
 signal order_expired(order: Order)   # гость ушёл, не дождавшись
 signal order_removed(order: Order)   # заказ закрыт (подан или гость ушёл)
 
+# Сколько секунд ждём нового гостя, когда все заказы уже выполнены
+const EMPTY_WAIT := 3.0
+
 var orders: Array[Order] = []
 var elapsed := 0.0                    # сколько секунд идёт смена
 var auto_spawn := true                # тесты выключают случайные заказы
@@ -53,6 +56,10 @@ func update(delta: float) -> void:
 			orders.erase(order)
 			order_expired.emit(order)
 			order_removed.emit(order)
+
+	# Если заказов нет, не заставляем игрока скучать: следующий гость придёт через пару секунд
+	if auto_spawn and orders.is_empty() and _counter > 0:
+		_next_spawn = minf(_next_spawn, elapsed + EMPTY_WAIT)
 
 	if auto_spawn and elapsed >= _next_spawn and elapsed <= spawn_cutoff() and orders.size() < max_orders():
 		add_order(_next_recipe())
