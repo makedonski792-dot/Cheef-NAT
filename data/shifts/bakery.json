@@ -3,7 +3,7 @@
 	"order": 3,
 	"name": "Пироги и десерты",
 	"description": "Киш и крем-брюле для самых сладкоежек.",
-	"duration": 420,
+	"duration": 480,
 	"first_order_delay": 2,
 	"second_order_delay": 35,
 	"order_interval": [
@@ -16,5 +16,5 @@
 		"quiche_lorraine",
 		"creme_brulee"
 	],
-	"patience_scale": 1.25
+	"patience_scale": 1.8
 }

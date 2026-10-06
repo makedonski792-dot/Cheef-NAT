@@ -3,7 +3,7 @@
 	"order": 2,
 	"name": "Классика",
 	"description": "Французская классика: луковый суп и свежий салат.",
-	"duration": 420,
+	"duration": 480,
 	"first_order_delay": 2,
 	"second_order_delay": 35,
 	"order_interval": [
@@ -16,5 +16,5 @@
 		"onion_soup",
 		"salade_nicoise"
 	],
-	"patience_scale": 1.25
+	"patience_scale": 1.8
 }

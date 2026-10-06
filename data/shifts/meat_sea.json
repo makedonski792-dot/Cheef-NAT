@@ -3,7 +3,7 @@
 	"order": 5,
 	"name": "Мясо и море",
 	"description": "Бёф бургиньон и мидии в вине для гурманов.",
-	"duration": 420,
+	"duration": 480,
 	"first_order_delay": 2,
 	"second_order_delay": 35,
 	"order_interval": [
@@ -16,5 +16,5 @@
 		"boeuf_bourguignon",
 		"moules_mariniere"
 	],
-	"patience_scale": 1.25
+	"patience_scale": 1.8
 }
