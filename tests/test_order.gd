@@ -112,7 +112,7 @@ func _init() -> void:
 	check(kitchen.orders.orders.is_empty(), "в начале заказов нет")
 	var order: Order = kitchen.orders.add_order(soup)
 	check(kitchen.orders.orders.size() == 1 and kitchen._tickets.has(order), "заказ появился, есть билет")
-	check(is_equal_approx(order.patience, soup["time_limit"]), "терпение гостя = %d с" % order.patience)
+	check(is_equal_approx(order.patience, soup["time_limit"] * float(kitchen.shift.get("patience_scale", 1.0))), "терпение гостя = %d с" % order.patience)
 
 	print("Общая тарелка")
 	check(assembly.candidates.size() == 2, "на пустой тарелке подходят оба блюда меню")

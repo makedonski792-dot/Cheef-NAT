@@ -4,7 +4,7 @@ extends CharacterBody2D
 # или экранным джойстиком (на телефоне). Стены его не пускают.
 # Анимация: переваливается при ходьбе и «рубит» у доски (working).
 
-const SPEED := 240.0
+const SPEED := 330.0
 const RADIUS := 18.0
 const WALK_BOB_SPEED := 14.0   # как быстро качается при ходьбе
 const WORK_BOB_SPEED := 20.0   # как быстро «рубит» у доски

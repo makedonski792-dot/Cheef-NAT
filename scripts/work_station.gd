@@ -40,6 +40,11 @@ func advance(_item: FoodItem) -> void:
 	pass
 
 
+# Почему станция не принимает предмет (подсказка игроку). Пусто, если принимает.
+func reject_reason(_item: FoodItem) -> String:
+	return ""
+
+
 # Цвет полоски прогресса
 func bar_color(_item: FoodItem) -> Color:
 	return Color("4ade80")

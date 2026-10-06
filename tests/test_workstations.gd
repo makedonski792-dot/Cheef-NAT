@@ -67,7 +67,7 @@ func _init() -> void:
 
 	stove.tick(4.1)
 	check(stove.slot.state == "cooked", "через 4 с готово")
-	stove.tick(5.1)
+	stove.tick(6.1)
 	check(stove.slot.state == "burnt", "ещё через 5 с сгорело")
 
 	kitchen.do_action()

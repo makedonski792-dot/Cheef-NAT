@@ -4,8 +4,8 @@ extends WorkStation
 # Анимация: конфорка светится, идёт пар. Перед пригоранием мигает красным,
 # пищит и дымит. Когда сгорело, чёрный дым.
 
-const COOK_SECONDS := 4.0   # до готовности
-const BURN_SECONDS := 5.0   # от готовности до пригорания
+const COOK_SECONDS := 3.5   # до готовности
+const BURN_SECONDS := 6.0   # от готовности до пригорания
 const WARNING_SECONDS := 2.5   # за сколько секунд до пригорания начинается тревога
 
 var _steam: CPUParticles2D
@@ -30,6 +30,19 @@ func accepts(item: FoodItem) -> bool:
 	if not item.can("heat"):
 		return false
 	return item.state == "chopped" or (item.state == "raw" and not item.can("chop"))
+
+
+# Почему на плите это не готовится
+func reject_reason(item: FoodItem) -> String:
+	if accepts(item):
+		return ""
+	if not item.can("heat"):
+		return "%s нельзя готовить на плите" % item.name
+	if item.state == "raw" and item.can("chop"):
+		return "сначала нарежь %s на Доске" % item.name.to_lower()
+	if item.state == "burnt":
+		return "%s сгорело, выбрось в мусорку" % item.name
+	return "%s уже готово" % item.name
 
 
 func step_duration(item: FoodItem) -> float:

@@ -5,7 +5,7 @@ extends Node2D
 
 const KITCHEN_SIZE := Vector2(960, 540)
 # Как близко к месту должен подойти повар (от края повара)
-const REACH := Chef.RADIUS + 16.0
+const REACH := Chef.RADIUS + 22.0
 const TICKET_GAP := 8.0
 
 var chef: Chef
@@ -26,6 +26,8 @@ var ended := false
 var _tickets := {}            # Order -> OrderTicket
 var _focus: Station
 var _hint_label: Label
+var _guide_label: Label
+var _ingredients := {}
 var _action_button: ActionButton
 var _shift_label: Label
 var _detail_title: Label
@@ -39,6 +41,7 @@ func _ready() -> void:
 	if shift.is_empty():
 		shift = GameState.pick_shift()
 	menu = RecipeLoader.recipes_for_shift(shift)
+	_ingredients = RecipeLoader.load_ingredients()
 	orders = OrderBoard.new(shift, menu)
 	orders.order_added.connect(_on_order_added)
 	orders.order_expired.connect(_on_order_expired)
@@ -105,6 +108,7 @@ func _process(delta: float) -> void:
 	else:
 		_action_button.label_text = ""
 		_hint_label.text = _rejection_hint()
+	_guide_label.text = _guide_text()
 
 
 # Пробел или Enter на клавиатуре — то же, что кнопка действия
@@ -118,6 +122,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func _rejection_hint() -> String:
 	if chef.held == null:
 		return ""
+	# Доска и плита объясняют, почему не принимают предмет
+	for station in stations:
+		if station is WorkStation and station.slot == null and station.distance_to(chef.position) <= REACH:
+			var work_reason: String = station.reject_reason(chef.held)
+			if work_reason != "":
+				return "%s: %s" % [station._label, work_reason]
 	if assembly.distance_to(chef.position) <= REACH:
 		var reason := assembly.reject_reason(chef.held)
 		if reason != "":
@@ -127,6 +137,67 @@ func _rejection_hint() -> String:
 		if reason != "":
 			return "Раздача: %s" % reason
 	return ""
+
+
+# Совет: что делать с предметом в руках (пока предмет в руках, текст виден всегда)
+func _guide_text() -> String:
+	var item := chef.held
+	if item == null:
+		return ""
+	if item.is_dish:
+		return "Совет: неси блюдо на Раздачу"
+	if item.state == "burnt":
+		return "Совет: сгорело! Выбрось в мусорку"
+
+	var needs := _needed_states(item.id)
+	if needs.is_empty():
+		return "Совет: %s не нужен в этой смене, выбрось" % item.name
+
+	var chopped: bool = "chopped" in needs
+	var cooked: bool = "cooked" in needs
+	var raw: bool = "raw" in needs
+	match item.state:
+		"raw":
+			if raw:
+				return "Совет: неси на Сборку"
+			if chopped and cooked:
+				return "Совет: на Доску (нарезать), потом на Сборку или на Плиту"
+			if chopped:
+				return "Совет: на Доску, нарезать"
+			if cooked:
+				return "Совет: сначала на Доску (нарезать), потом на Плиту" if item.can("chop") else "Совет: неси на Плиту"
+		"chopped":
+			if chopped and cooked:
+				return "Совет: на Сборку или на Плиту"
+			if chopped:
+				return "Совет: нарезано! Неси на Сборку"
+			if cooked:
+				return "Совет: неси на Плиту"
+		"cooked":
+			if cooked:
+				return "Совет: готово! Неси на Сборку"
+	return "Совет: в таком виде это сейчас не подойдёт"
+
+
+# В каком виде нужен продукт для блюд смены. Сначала смотрим блюда, которые
+# заказали гости; если там продукт не нужен, смотрим всё меню.
+func _needed_states(ingredient_id: String) -> Array[String]:
+	var ordered: Array = []
+	for order in orders.orders:
+		ordered.append(order.recipe)
+	var result := _states_in(ordered, ingredient_id)
+	if result.is_empty():
+		result = _states_in(menu, ingredient_id)
+	return result
+
+
+func _states_in(recipes: Array, ingredient_id: String) -> Array[String]:
+	var result: Array[String] = []
+	for recipe_data in recipes:
+		for step in recipe_data["steps"]:
+			if step["item"]["id"] == ingredient_id and not (step["item"]["state"] in result):
+				result.append(step["item"]["state"])
+	return result
 
 
 # Выполнить действие с ближайшим подходящим местом
@@ -255,10 +326,21 @@ func _refresh_detail() -> void:
 	for step in recipe["steps"]:
 		var mark := "[x]" if cooking != null and step["id"] in cooking.done else "[  ]"
 		var optional := "" if required.has(step["id"]) else " *"
-		lines.append("%s %s%s" % [mark, step["text"], optional])
+		lines.append("%s %s%s %s" % [mark, step["text"], optional, _prep_tag(step)])
 	_detail_title.text = recipe["name"]
-	_detail_label.text = header + "\n" + "\n".join(lines)
-	_detail_label.add_theme_font_size_override("font_size", 13 if recipe["steps"].size() <= 8 else 11)
+	_detail_label.text = header + "\nД = доска, П = плита\n" + "\n".join(lines)
+	_detail_label.add_theme_font_size_override("font_size", 12 if recipe["steps"].size() <= 8 else 10)
+
+
+# Короткая пометка, как приготовить продукт: [Д] резать на доске, [П] жарить на плите
+func _prep_tag(step: Dictionary) -> String:
+	var info: Dictionary = _ingredients.get(step["item"]["id"], {})
+	match step["item"]["state"]:
+		"chopped":
+			return "[Д]"
+		"cooked":
+			return "[Д→П]" if info.get("chop", false) else "[П]"
+	return ""
 
 
 # Шаги, которые входят во все варианты блюда (остальные — «на выбор»)
@@ -452,12 +534,12 @@ func _build_interface() -> void:
 	var card := ColorRect.new()
 	card.color = Color(1, 1, 1, 0.82)
 	card.position = Vector2(24, 138)
-	card.size = Vector2(180, 190)
+	card.size = Vector2(192, 250)
 	layer.add_child(card)
 
 	_detail_title = Label.new()
 	_detail_title.position = Vector2(8, 4)
-	_detail_title.size = Vector2(166, 24)
+	_detail_title.size = Vector2(178, 24)
 	_detail_title.clip_text = true
 	_detail_title.add_theme_font_size_override("font_size", 15)
 	_detail_title.add_theme_color_override("font_color", Color("3b2a1a"))
@@ -465,7 +547,7 @@ func _build_interface() -> void:
 
 	_detail_label = Label.new()
 	_detail_label.position = Vector2(8, 28)
-	_detail_label.size = Vector2(166, 156)
+	_detail_label.size = Vector2(178, 216)
 	_detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail_label.add_theme_font_size_override("font_size", 13)
 	_detail_label.add_theme_color_override("font_color", Color("3b2a1a"))
@@ -480,12 +562,23 @@ func _build_interface() -> void:
 
 	# Подсказка: что произойдёт по кнопке действия
 	_hint_label = Label.new()
-	_hint_label.position = Vector2(220, 170)
+	_hint_label.position = Vector2(232, 140)
 	_hint_label.size = Vector2(450, 50)
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.add_theme_font_size_override("font_size", 19)
 	_hint_label.add_theme_color_override("font_color", Color("8a3b00"))
 	layer.add_child(_hint_label)
+
+	# Совет: что делать с предметом в руках
+	_guide_label = Label.new()
+	_guide_label.position = Vector2(232, 190)
+	_guide_label.size = Vector2(460, 44)
+	_guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_guide_label.add_theme_font_size_override("font_size", 17)
+	_guide_label.add_theme_color_override("font_color", Color("1b5e20"))
+	_guide_label.add_theme_color_override("font_outline_color", Color.WHITE)
+	_guide_label.add_theme_constant_override("outline_size", 5)
+	layer.add_child(_guide_label)
 
 	var menu_button := Button.new()
 	menu_button.text = "Меню"

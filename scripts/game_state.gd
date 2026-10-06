@@ -11,6 +11,9 @@ var coins: int = 0
 # Включён ли звук (запоминается в сохранении)
 var sound_enabled: bool = true
 
+# Видел ли игрок короткое обучение (показываем один раз)
+var tutorial_seen: bool = false
+
 # Номер игрового дня. Каждый день своя смена с новым меню (смены идут по кругу)
 var day: int = 1
 
@@ -43,7 +46,7 @@ func finish_shift() -> void:
 
 
 func save_game() -> void:
-	SaveGame.write({"coins": coins, "sound": sound_enabled, "day": day}, save_path)
+	SaveGame.write({"coins": coins, "sound": sound_enabled, "day": day, "tutorial": tutorial_seen}, save_path)
 
 
 # Загрузить сохранение. Если его нет, начинаем с 0 монет.
@@ -53,3 +56,4 @@ func load_game() -> void:
 	coins = maxi(0, int(data.get("coins", 0)))
 	sound_enabled = bool(data.get("sound", true))
 	day = maxi(1, int(data.get("day", 1)))
+	tutorial_seen = bool(data.get("tutorial", false))

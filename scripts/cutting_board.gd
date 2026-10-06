@@ -3,7 +3,7 @@ extends WorkStation
 # Разделочная доска: режет сырые продукты. Повар должен стоять рядом.
 # Пока идёт нарезка, над продуктом машет нож, летят кусочки и стучит звук.
 
-const CHOP_SECONDS := 3.0
+const CHOP_SECONDS := 2.5
 const HIT_INTERVAL := 0.33   # как часто «удар ножа»
 
 var _hit_timer := 0.0
@@ -17,6 +17,17 @@ func _init() -> void:
 # Принимает только сырое, что можно резать
 func accepts(item: FoodItem) -> bool:
 	return item.state == "raw" and item.can("chop")
+
+
+# Почему на доске это не режется
+func reject_reason(item: FoodItem) -> String:
+	if accepts(item):
+		return ""
+	if not item.can("chop"):
+		return "%s нельзя нарезать" % item.name
+	if item.state == "chopped":
+		return "%s уже нарезано" % item.name
+	return "%s уже готовили, резать поздно" % item.name
 
 
 func step_duration(item: FoodItem) -> float:

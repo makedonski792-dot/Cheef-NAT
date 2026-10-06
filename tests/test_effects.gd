@@ -89,7 +89,7 @@ func _init() -> void:
 	await process_frame
 	check(stove.is_working() and stove._steam.emitting, "над плитой идёт пар")
 	stove.tick(4.1)
-	stove.progress = 3.0   # готово давно, вот-вот сгорит
+	stove.progress = 4.0   # готово давно, вот-вот сгорит
 	await process_frame
 	await process_frame
 	check(stove._is_about_to_burn() and stove._smoke.emitting, "перед пригоранием идёт дым")
