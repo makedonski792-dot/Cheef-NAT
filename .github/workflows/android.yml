@@ -52,12 +52,15 @@ jobs:
             echo "::error title=Files::$(ls /usr/lib/android-sdk/build-tools /usr/lib/android-sdk/platforms ~/.local/share/godot/export_templates/* 2>&1 | tr '\n' ' ')"
             exit 1
           fi
+          # Уникальное имя на каждую сборку: Telegram и браузеры не припишут к нему «-4» и сломают расширение
+          mv build/french-chef.apk "build/french-chef-v${GITHUB_RUN_NUMBER}.apk"
+          ls -la build
 
       - name: Сохранить APK
         uses: actions/upload-artifact@v4
         with:
           name: french-chef-apk
-          path: build/french-chef.apk
+          path: build/french-chef-v*.apk
 
   release:
     name: Опубликовать на странице Releases
@@ -77,8 +80,10 @@ jobs:
         run: |
           # Удаляем прошлый релиз, чтобы на странице всегда лежала свежая версия
           gh release delete latest --cleanup-tag --yes --repo "$GITHUB_REPOSITORY" || true
-          gh release create latest french-chef.apk \
+          APK=$(ls french-chef-v*.apk | head -n 1)
+          echo "Публикуем файл: $APK"
+          gh release create latest "$APK" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Французский шеф (последняя сборка)" \
-            --notes "Автоматическая сборка из коммита ${GITHUB_SHA::7}. Скачай french-chef.apk на телефон и установи."
+            --notes "Автоматическая сборка из коммита ${GITHUB_SHA::7}. Скачай ${APK} на телефон и установи. Не переименовывай файл и следи, чтобы он заканчивался на .apk"
